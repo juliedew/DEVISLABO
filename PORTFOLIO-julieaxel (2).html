@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Julie Deweerdt</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-snap-type:y mandatory;overflow-y:scroll}
+body{background:#080807;color:#ede8de;font-family:'DM Mono',monospace;cursor:none;overflow-x:hidden}
+
+/* ── CURSOR ── */
+#cr{position:fixed;z-index:9999;pointer-events:none;width:8px;height:8px;background:#c9a96e;border-radius:50%;transform:translate(-50%,-50%);transition:width .15s,height .15s}
+#cr2{position:fixed;z-index:9998;pointer-events:none;width:36px;height:36px;border:1px solid rgba(201,169,110,.35);border-radius:50%;transform:translate(-50%,-50%);transition:all .07s linear}
+.ptr #cr{width:36px;height:36px;background:transparent;border:1px solid #c9a96e}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;justify-content:space-between;align-items:center;padding:32px 72px;mix-blend-mode:difference}
+.nl{font-family:'Cormorant',serif;font-size:14px;letter-spacing:.3em;text-transform:uppercase;color:#ede8de;text-decoration:none;font-weight:300}
+.nr{display:flex;gap:36px;list-style:none}
+.nr a{font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:#ede8de;text-decoration:none;opacity:.5;transition:opacity .3s}
+.nr a:hover{opacity:1}
+
+/* ── PAGE DOTS ── */
+.pd{position:fixed;right:32px;top:50%;transform:translateY(-50%);z-index:200;display:flex;flex-direction:column;gap:14px}
+.pd-d{width:5px;height:5px;border-radius:50%;background:rgba(237,232,222,.2);cursor:pointer;transition:all .4s}
+.pd-d.on{background:#c9a96e;transform:scale(1.6)}
+
+/* ── SECTION ── */
+section{height:100vh;scroll-snap-align:start;position:relative;overflow:hidden}
+
+/* ══ P1 HERO ══ */
+#s1 .bg{position:absolute;inset:0;background-image:url("images/hero-bg.jpg");background-size:cover;background-position:center 15%;filter:brightness(.3);transform:scale(1.06);transition:transform 14s ease}
+#s1.vi .bg{transform:scale(1)}
+#s1 .grain{position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E");pointer-events:none}
+.hero-c{position:absolute;bottom:10vh;left:72px;right:72px}
+.hero-tag{font-size:9px;letter-spacing:.5em;text-transform:uppercase;color:#c9a96e;margin-bottom:28px;opacity:.8}
+.hero-h1{font-family:'Cormorant',serif;font-size:clamp(86px,12vw,180px);font-weight:300;line-height:.82;letter-spacing:-.02em;color:#ede8de}
+.hero-h1 em{font-style:italic;font-weight:300;opacity:.5}
+.hero-sub{margin-top:32px;font-size:10px;letter-spacing:.3em;color:rgba(237,232,222,.35);text-transform:uppercase}
+.scroll-hint{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px}
+.sh-line{width:1px;height:56px;background:linear-gradient(transparent,#c9a96e);animation:sl 2.2s infinite}
+@keyframes sl{0%,100%{opacity:.2;transform:scaleY(1)}50%{opacity:1;transform:scaleY(1.15)}}
+
+/* ══ P2 DÉMARCHE ══ */
+#s2{background:#0d0d0b;display:grid;grid-template-columns:1fr 1fr;align-items:stretch}
+.dm-l{padding:120px 72px;display:flex;flex-direction:column;justify-content:center;border-right:1px solid rgba(237,232,222,.06)}
+.dm-r{padding:120px 72px;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.ey{font-size:9px;letter-spacing:.5em;text-transform:uppercase;color:#c9a96e;margin-bottom:48px;display:flex;align-items:center;gap:14px}
+.ey::before{content:'';width:28px;height:1px;background:#c9a96e}
+.dm-title{font-family:'Cormorant',serif;font-size:clamp(44px,5vw,70px);font-weight:300;line-height:1.05;color:#ede8de;margin-bottom:40px}
+.dm-title em{font-style:italic;color:#c9a96e}
+.dm-p{font-size:13px;line-height:2;color:rgba(237,232,222,.5);max-width:480px}
+.dm-p+.dm-p{margin-top:20px}
+.stat-row{display:grid;grid-template-columns:1fr 1fr;gap:2px}
+.st{background:#141412;padding:44px 36px;position:relative;overflow:hidden}
+.st::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#c9a96e,transparent);opacity:0;transition:opacity .5s}
+.st:hover::after{opacity:1}
+.sn{font-family:'Cormorant',serif;font-size:clamp(48px,5.5vw,76px);font-weight:300;color:#ede8de;line-height:1}
+.sl{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(237,232,222,.35);margin-top:8px}
+
+/* ══ P3 UNDERWATER ══ */
+#s3{background:#080807;display:flex;flex-direction:column;height:auto;min-height:100vh;scroll-snap-align:start}
+.uw-header{padding:64px 72px 48px;display:flex;justify-content:space-between;align-items:flex-start;flex-shrink:0;z-index:2}
+.uw-bignb{display:none}
+.uw-tblock{}
+.uw-ey{font-size:9px;letter-spacing:.45em;text-transform:uppercase;color:#c9a96e;margin-bottom:16px}
+.uw-title{font-family:'Cormorant',serif;font-size:clamp(48px,7vw,96px);font-weight:300;line-height:.87;color:#ede8de}
+.uw-title em{font-style:italic;opacity:.45}
+.uw-desc{margin-top:0;margin-bottom:14px;font-size:12px;line-height:1.9;color:rgba(237,232,222,.4);max-width:640px}
+.uw-desc-lead{font-family:'Cormorant',serif;font-size:clamp(20px,2vw,28px);font-weight:300;color:rgba(237,232,222,.75);margin-bottom:20px}
+.uw-desc-coda{color:rgba(237,232,222,.6);font-style:italic;margin-top:8px}
+.uw-grid{height:52vh;display:grid;grid-template-columns:1.3fr 1fr 1fr 1.3fr;gap:3px}
+.uw-c{position:relative;overflow:hidden;cursor:none}
+.uw-c img{width:100%;height:100%;object-fit:cover;filter:saturate(.7) brightness(.8);transition:transform 1s cubic-bezier(.16,1,.3,1),filter .5s}
+.uw-c:hover img{transform:scale(1.07);filter:saturate(1) brightness(.95)}
+.uw-cap{position:absolute;bottom:0;left:0;right:0;padding:48px 22px 18px;background:linear-gradient(transparent,rgba(8,8,7,.95));opacity:0;transform:translateY(6px);transition:all .4s}
+.uw-c:hover .uw-cap{opacity:1;transform:translateY(0)}
+.uw-depth{font-family:'Cormorant',serif;font-size:32px;font-weight:300;color:#c9a96e;display:block;letter-spacing:-.01em}
+.uw-co{font-size:9px;letter-spacing:.2em;color:rgba(237,232,222,.4);display:block;margin-top:5px}
+
+/* ══ P4 2073 INTRO ══ */
+#s4{background:#0d0d0b}
+.p4-hero{position:absolute;top:0;left:0;right:0;height:50vh;overflow:hidden}
+.p4-hero img{width:100%;height:100%;object-fit:cover;object-position:center 30%;filter:brightness(.5) saturate(1.1)}
+.p4-fade{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 30%,#0d0d0b 100%)}
+.p4-head{position:absolute;top:0;left:0;right:0;padding:90px 72px 0;display:flex;justify-content:space-between;align-items:flex-start;z-index:2}
+.p4-ttl{font-family:'Cormorant',serif;font-size:clamp(72px,11vw,160px);font-weight:300;line-height:.82;color:#ede8de}
+.p4-logo{height:44px;filter:invert(1);opacity:.55}
+.p4-bottom{position:absolute;bottom:0;left:0;right:0;height:52vh;padding:0 72px 56px;display:flex;flex-direction:column;justify-content:flex-end;gap:24px}
+.p4-ey{font-size:9px;letter-spacing:.5em;text-transform:uppercase;color:#c9a96e;margin-bottom:0}
+.p4-intro-text{font-family:'Cormorant',serif;font-size:clamp(16px,1.6vw,22px);font-weight:300;font-style:italic;line-height:1.6;color:rgba(237,232,222,.65);max-width:700px}
+.p4-intro-body{font-size:12px;line-height:2;color:rgba(237,232,222,.4);max-width:640px}
+
+/* ══ P5 CANAL + ABYMES ══ */
+#s5{background:#080807;display:grid;grid-template-columns:1fr 1fr;gap:3px}
+.oeuvre-cell{position:relative;overflow:hidden;cursor:none}
+.oeuvre-cell img{width:100%;height:100%;object-fit:cover;filter:brightness(.45) saturate(1.1);transition:filter .6s,transform .9s}
+.oeuvre-cell:hover img{filter:brightness(.65) saturate(1.2);transform:scale(1.04)}
+.oeuvre-info{position:absolute;bottom:0;left:0;right:0;padding:80px 44px 44px;background:linear-gradient(transparent,rgba(8,8,7,.96))}
+.oi-label{font-size:9px;letter-spacing:.4em;text-transform:uppercase;color:#c9a96e;margin-bottom:10px}
+.oi-title{font-family:'Cormorant',serif;font-size:clamp(26px,3vw,40px);font-weight:300;color:#ede8de;margin-bottom:6px}
+.oi-coords{font-size:9px;letter-spacing:.2em;color:rgba(237,232,222,.35);margin-bottom:18px;font-family:'DM Mono',monospace}
+.oi-text{font-size:12px;line-height:1.9;color:rgba(237,232,222,.5);max-width:460px}
+.map-pin{position:absolute;top:24px;right:24px;width:88px;height:88px;overflow:hidden;border:1px solid rgba(237,232,222,.12)}
+.map-pin img{width:100%;height:100%;object-fit:cover;filter:saturate(.6) brightness(.75)}
+
+/* ══ P6 CAP + CHARP ══ */
+#s6{background:#0d0d0b;display:grid;grid-template-columns:1fr 1fr;gap:3px}
+
+/* ══ P7 AIMÉ ══ */
+#s7{background:#080807;display:flex;align-items:center}
+.ai-left{padding:100px 14vw;display:flex;flex-direction:column;justify-content:center;width:100%;max-width:900px;margin:0 auto}
+.ai-ey{font-size:9px;letter-spacing:.5em;text-transform:uppercase;color:#c9a96e;margin-bottom:28px}
+.ai-title{font-family:'Cormorant',serif;font-size:clamp(64px,9vw,130px);font-weight:300;line-height:.82;color:#ede8de;margin-bottom:36px}
+.ai-intro{font-family:'Cormorant',serif;font-size:clamp(18px,1.7vw,24px);font-style:italic;font-weight:300;line-height:1.6;color:rgba(237,232,222,.6);margin-bottom:28px;max-width:480px}
+.ai-body{font-size:12px;line-height:2;color:rgba(237,232,222,.4);max-width:480px}
+.ai-right{display:grid;grid-template-rows:1fr 1fr;gap:3px}
+.ai-img{position:relative;overflow:hidden;cursor:none}
+.ai-img img{width:100%;height:100%;object-fit:cover;filter:brightness(.55) saturate(.8);transition:filter .5s,transform .8s}
+.ai-img:hover img{filter:brightness(.78) saturate(1.1);transform:scale(1.05)}
+.ai-img-lb{position:absolute;bottom:0;left:0;right:0;padding:32px 24px 16px;background:linear-gradient(transparent,rgba(8,8,7,.88));font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(237,232,222,.45)}
+
+/* ══ P8 RUINES ══ */
+#s8{background:#0d0d0b;display:flex;flex-direction:column;overflow-y:auto;scroll-snap-align:start}
+.ruin-header{padding:80px 72px 44px;border-bottom:1px solid rgba(237,232,222,.06)}
+.ruin-h-top{display:flex;justify-content:space-between;align-items:flex-end}
+.ruin-title{font-family:'Cormorant',serif;font-size:clamp(40px,5vw,68px);font-weight:300;color:#ede8de}
+.ruin-desc{font-size:12px;line-height:1.9;color:rgba(237,232,222,.4);max-width:400px;text-align:right}
+.ruin-grid{flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;overflow:hidden}
+.ruin-c{position:relative;overflow:hidden;cursor:none}
+.ruin-c img{width:100%;height:100%;object-fit:cover;filter:brightness(.55) saturate(.8);transition:filter .5s,transform .8s}
+.ruin-c:hover img{filter:brightness(.8) saturate(1);transform:scale(1.06)}
+.ruin-num{position:absolute;top:16px;left:20px;font-family:'Cormorant',serif;font-size:48px;font-weight:300;color:rgba(237,232,222,.08);pointer-events:none}
+.ruin-text-below{padding:40px 72px;font-size:12px;line-height:2;color:rgba(237,232,222,.45);border-top:1px solid rgba(237,232,222,.06);max-width:none}
+
+/* ══ P9 BOUDIN ══ */
+#s9{background:#080807;display:flex;flex-direction:column;height:auto;min-height:100vh;scroll-snap-align:start}
+.bd-header{padding:64px 72px 40px;border-bottom:1px solid rgba(237,232,222,.06)}
+.bd-title{font-family:'Cormorant',serif;font-size:clamp(40px,5vw,68px);font-weight:300;color:#ede8de}
+.bd-desc{font-size:12px;line-height:1.9;color:rgba(237,232,222,.4);max-width:680px;margin-top:0;margin-bottom:14px}
+.bd-desc-coda{color:rgba(237,232,222,.6);font-style:italic;margin-top:8px}
+.bd-grid{height:55vh;display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;overflow:hidden}
+.bd-c{position:relative;overflow:hidden;cursor:none}
+.bd-c img{width:100%;height:100%;object-fit:contain;background:#080807;filter:brightness(.85) saturate(.9);transition:filter .5s,transform .8s}
+.bd-c:hover img{filter:brightness(1) saturate(1.1);transform:scale(1.02)}
+.bd-cap{position:absolute;bottom:0;left:0;right:0;padding:40px 20px 18px;background:linear-gradient(transparent,rgba(8,8,7,.92));opacity:0;transform:translateY(5px);transition:all .35s}
+.bd-c:hover .bd-cap{opacity:1;transform:translateY(0)}
+.bd-sub{font-family:'Cormorant',serif;font-size:20px;font-weight:300;color:#c9a96e;display:block}
+.bd-mini{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(237,232,222,.4);display:block;margin-top:4px}
+
+/* ══ P10 BIOGRAPHIE ══ */
+#s10{background:#0d0d0b;display:grid;grid-template-columns:40% 1fr;align-items:stretch;height:auto;min-height:100vh;scroll-snap-align:start}
+.bio-img-col{position:relative;overflow:hidden;min-height:100vh}
+.bio-img-col img{width:100%;height:100%;object-fit:cover;filter:brightness(.5) saturate(.6)}
+.bio-img-fade{position:absolute;inset:0;background:linear-gradient(to right,transparent,#0d0d0b)}
+.bio-content{padding:60px 72px 80px 60px;display:flex;flex-direction:column;justify-content:flex-start;overflow-y:auto}
+.bio-name{font-family:'Cormorant',serif;font-size:clamp(44px,5.5vw,76px);font-weight:300;line-height:.88;color:#ede8de;margin-bottom:12px}
+.bio-birth{font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:rgba(237,232,222,.3);margin-bottom:44px}
+.bio-intro-text{font-size:12px;line-height:2;color:rgba(237,232,222,.5);max-width:520px;margin-bottom:20px}
+.tl{}
+.tl-row{display:grid;grid-template-columns:64px 1fr;gap:16px;padding:16px 0;border-top:1px solid rgba(237,232,222,.05)}
+.tl-y{font-family:'Cormorant',serif;font-size:14px;font-weight:600;color:#c9a96e;padding-top:2px}
+.tl-t strong{display:block;font-size:13px;font-weight:400;color:#ede8de;letter-spacing:.02em;margin-bottom:3px}
+.tl-t{font-size:11px;line-height:1.8;color:rgba(237,232,222,.4)}
+.bio-stats{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:44px}
+.bs{background:#141412;padding:26px 24px}
+.bs-n{font-family:'Cormorant',serif;font-size:38px;font-weight:300;color:#ede8de;line-height:1}
+.bs-l{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(237,232,222,.3);margin-top:5px}
+.bio-link{display:inline-flex;align-items:center;gap:10px;margin-top:36px;padding-top:20px;border-top:1px solid rgba(237,232,222,.08);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#c9a96e;text-decoration:none;width:fit-content;cursor:none}
+.bio-link-arr{font-size:13px;transition:transform .3s}
+.bio-link:hover .bio-link-arr{transform:translateX(5px)}
+/* #s10 défile en interne (overflow-y:auto) donc sa hauteur totale dépasse souvent 100vh :
+   l'IntersectionObserver (threshold .4) ne voit alors jamais 40% de la section et
+   les éléments .rv restent bloqués à opacity:0 → texte invisible. On force leur affichage ici. */
+#s10 .rv{opacity:1;transform:none;transition:none}
+
+/* ══ P11 CONTACT ══ */
+#s11{background:#080807;display:grid;grid-template-columns:55% 1fr}
+.ct-img{position:relative;overflow:hidden}
+.ct-img img{width:100%;height:100%;object-fit:cover;object-position:center 40%;filter:brightness(.25) saturate(.5)}
+.ct-img-fade{position:absolute;inset:0;background:linear-gradient(to right,transparent 50%,#080807 100%)}
+.ct-content{padding:100px 72px;display:flex;flex-direction:column;justify-content:center}
+.ct-big{font-family:'Cormorant',serif;font-size:clamp(52px,7vw,100px);font-weight:300;line-height:.85;color:#ede8de;margin-bottom:64px}
+.ct-big em{font-style:italic;color:#c9a96e}
+.ct-links{display:flex;flex-direction:column}
+.ct-a{display:flex;justify-content:space-between;align-items:center;padding:22px 0;border-top:1px solid rgba(237,232,222,.07);text-decoration:none;color:#ede8de;transition:color .3s;position:relative}
+.ct-a:last-child{border-bottom:1px solid rgba(237,232,222,.07)}
+.ct-a::after{content:'';position:absolute;bottom:-1px;left:0;width:0;height:1px;background:#c9a96e;transition:width .45s}
+.ct-a:hover::after{width:100%}
+.ct-a:hover{color:#c9a96e}
+.ct-a-lbl{font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:rgba(237,232,222,.3);margin-bottom:4px}
+.ct-a-val{font-size:14px;letter-spacing:.03em}
+.ct-a-arr{font-size:18px;opacity:.25;transition:opacity .3s,transform .3s}
+.ct-a:hover .ct-a-arr{opacity:1;transform:translateX(5px)}
+.qr-wrap{display:flex;align-items:center;gap:20px;margin-top:44px}
+.qr-wrap img{width:72px;height:72px;object-fit:cover;border:1px solid rgba(237,232,222,.12)}
+.qr-txt{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(237,232,222,.25);line-height:1.8}
+
+/* REVEAL */
+.rv{opacity:0;transform:translateY(22px);transition:opacity 1s cubic-bezier(.16,1,.3,1),transform 1s cubic-bezier(.16,1,.3,1)}
+.rv.in{opacity:1;transform:translateY(0)}
+.rv.d1{transition-delay:.15s}.rv.d2{transition-delay:.3s}.rv.d3{transition-delay:.45s}
+
+/* LIGHTBOX */
+.lb{display:none;position:fixed;inset:0;z-index:9000;background:rgba(8,8,7,.98);align-items:center;justify-content:center}
+.lb.on{display:flex}
+.lb img{max-width:90vw;max-height:88vh;object-fit:contain}
+.lb-x{position:absolute;top:28px;right:40px;background:none;border:none;color:rgba(237,232,222,.3);font-size:10px;letter-spacing:.3em;text-transform:uppercase;cursor:none;transition:color .2s}
+.lb-x:hover{color:#ede8de}
+
+@media(max-width:900px){
+  nav{padding:18px 24px}.nr{display:none}.pd{display:none}
+  #s2,#s5,#s6,#s7,#s10,#s11{grid-template-columns:1fr}
+  .bio-img-col,.ct-img{display:none}
+  .dm-l,.dm-r,.ai-left,.ct-content,.bio-content{padding:60px 24px}
+  .uw-header{padding:72px 24px 0}
+  .hero-c{left:24px;right:24px;bottom:8vh}
+  .p4-head,.p4-bottom,.ruin-header,.bd-header{padding-left:24px;padding-right:24px}
+  .oeuvre-info{padding:40px 24px 24px}
+  .ruin-grid,.bd-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="cr"></div>
+<div id="cr2"></div>
+
+<nav>
+  <a href="#s1" class="nl">Julie Deweerdt</a>
+  <ul class="nr">
+    <li><a href="#s2">Démarche</a></li>
+    <li><a href="#s3">Underwater</a></li>
+    <li><a href="#s4">2073</a></li>
+    <li><a href="#s7">Aimé</a></li>
+    <li><a href="#s8">Œuvres</a></li>
+    <li><a href="#s10">Bio</a></li>
+    <li><a href="#s11">Contact</a></li>
+  </ul>
+</nav>
+
+<div class="pd" id="pd">
+  <div class="pd-d on" onclick="gp(0)"></div>
+  <div class="pd-d" onclick="gp(1)"></div>
+  <div class="pd-d" onclick="gp(2)"></div>
+  <div class="pd-d" onclick="gp(3)"></div>
+  <div class="pd-d" onclick="gp(4)"></div>
+  <div class="pd-d" onclick="gp(5)"></div>
+  <div class="pd-d" onclick="gp(6)"></div>
+  <div class="pd-d" onclick="gp(7)"></div>
+  <div class="pd-d" onclick="gp(8)"></div>
+  <div class="pd-d" onclick="gp(9)"></div>
+  <div class="pd-d" onclick="gp(10)"></div>
+</div>
+
+<!-- ══ PAGE 1 : HERO ══ -->
+<section id="s1">
+  <div class="bg"></div>
+  <div class="grain"></div>
+  <div class="hero-c">
+    <div class="hero-tag rv">Art numérique · 3D · Intelligence artificielle · Martinique</div>
+    <h1 class="hero-h1 rv d1">Julie<br><em>Deweerdt</em></h1>
+    <p class="hero-sub rv d2">Artiste numérique — Fondatrice Labo Studio</p>
+  </div>
+  <div class="scroll-cue"><div class="sh-line"></div></div>
+</section>
+
+<!-- ══ PAGE 2 : DÉMARCHE ══ -->
+<section id="s2">
+  <div class="dm-l">
+    <div class="ey rv">Démarche artistique</div>
+    <h2 class="dm-title rv d1">La nature<br>reprend<br><em>ses droits</em></h2>
+    <div class="rv d2">
+      <p class="dm-p">Ma pratique se situe à l'intersection de l'art numérique, de la 3D et de l'intelligence artificielle. Chaque série explore un territoire géographique ou conceptuel précis. Le temps y est une matière&nbsp;: ce qui fut, ce qui sombre, ce qui pourrait advenir.</p>
+      <p class="dm-p">La dystopie m'intéresse moins comme catastrophe que comme utopie possible — un espace où imaginer autrement. Dans ma phase créative finale, j'ouvre délibérément un dialogue avec l'IA. Non comme outil de substitution, mais comme interlocutrice invitée à prolonger l'œuvre, à la déborder, à poser ses propres questions.</p>
+    </div>
+  </div>
+  <div class="dm-r">
+    <div class="stat-row rv">
+      <div class="st"><div class="sn">4</div><div class="sl">Séries actives</div></div>
+      <div class="st"><div class="sn">4</div><div class="sl">Expositions</div></div>
+    </div>
+    <div class="stat-row rv d1">
+      <div class="st"><div class="sn">1</div><div class="sl">Résidence artistique · 490</div></div>
+      <div class="st"><div class="sn">3</div><div class="sl">Territoires</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ PAGE 3 : UNDERWATER ══ -->
+<section id="s3">
+  <div class="uw-header">
+    <div class="uw-tblock">
+      <div class="uw-ey rv">Série en cours — Golfe du Mexique</div>
+      <div class="uw-title rv d1">Under<br><em>water</em></div>
+      <p class="uw-desc rv d2 uw-desc-lead">Au fond des océans.</p>
+      <p class="uw-desc rv d2">Là où l'homme ne met pas un pied,<br>Il y a pourtant les traces de son passage.</p>
+      <p class="uw-desc rv d2">Le mettant en retrait, j'ose imaginer une nature tentant de se reconstruire.</p>
+      <p class="uw-desc rv d2">C'est dans un monde sous-marin virtuel que j'explore les possibilités.</p>
+      <p class="uw-desc rv d2">Cet espace onirique traduit par ses couleurs et ses formes la perpétuelle évolution des espèces et des espaces. Le temps.</p>
+      <p class="uw-desc rv d2">J'offre une vision pleine d'espoir, l'espoir d'un renouveau dans lequel l'homme n'est pas au centre de l'attention.</p>
+      <p class="uw-desc rv d2">C'est une dystopie poétique mêlant les techniques de la 3D et de l'IA, des technologies nouvelles qui me permettent de construire un monde inconnu.</p>
+      <p class="uw-desc rv d2 uw-desc-coda">C'est une vision du temps libérée du chaos. Chaque série vous transporte dans un espace géographique distinct, vous permettant de suivre son évolution à mon rythme.</p>
+    </div>
+    <div class="uw-bignb">01</div>
+  </div>
+  <div class="uw-grid">
+    <div class="uw-c" onclick="lb(this)"><img src="images/underwater-2450m.jpg" alt="2450">
+      <div class="uw-cap"><span class="uw-depth">2 450</span><span class="uw-co">22°41′29.6″N 95°05′25.8″W</span></div></div>
+    <div class="uw-c" onclick="lb(this)"><img src="images/underwater-2990m.jpg" alt="2990">
+      <div class="uw-cap"><span class="uw-depth">2 990</span><span class="uw-co">22°41′29.6″N 95°05′25.8″W</span></div></div>
+    <div class="uw-c" onclick="lb(this)"><img src="images/underwater-3600m.jpg" alt="3600">
+      <div class="uw-cap"><span class="uw-depth">3 600</span><span class="uw-co">22°41′29.6″N 95°05′25.8″W</span></div></div>
+    <div class="uw-c" onclick="lb(this)"><img src="images/underwater-5470m.jpg" alt="5470">
+      <div class="uw-cap"><span class="uw-depth">5 470</span><span class="uw-co">22°41′29.6″N 95°05′25.8″W</span></div></div>
+  </div>
+</section>
+
+<!-- ══ PAGE 4 : 2073 INTRO ══ -->
+<section id="s4">
+  <div class="p4-hero"><img src="images/quartier-canal.jpg" alt="Quartier Canal"><div class="p4-fade"></div></div>
+  <div class="p4-head">
+    <div>
+      <div class="p4-ey rv">Résidence 490 · 490 km de littoral · Martinique · Septembre 2023</div>
+      <div class="p4-ttl rv d1">2073</div>
+    </div>
+    <img class="p4-logo rv d2" src="images/logo-490.png" alt="490">
+  </div>
+  <div class="p4-bottom">
+    <p class="p4-intro-text rv">Portée par la Station Culturelle, soutenue par le BRGM, le Parc naturel marin et le Conservatoire du littoral.</p>
+    <p class="p4-intro-body rv d1">Quatre œuvres explorant la submersion des littoraux martiniquais à l'horizon de cinquante ans. La Nature y reprend sa place de propriétaire. Chaque site raconte une relation consumée à la nature, un futur où la mangrove, la mer et la montagne reprennent ce qui leur appartient. La Martinique compte 490 km de littoral — c'est de ce chiffre qu'est né le nom de la résidence.</p>
+  </div>
+</section>
+
+<!-- ══ PAGE 5 : CANAL + ABYMES ══ -->
+<section id="s5">
+  <div class="oeuvre-cell" onclick="lb(this)">
+    <img src="images/quartier-canal.jpg" alt="Quartier Canal">
+    <div class="map-pin"><img src="images/carte-canal.png" alt="carte canal"></div>
+    <div class="oeuvre-info">
+      <div class="oi-label">2073 · Martinique</div>
+      <div class="oi-title">Quartier Canal</div>
+      <div class="oi-coords">14°33′48.6″N 60°59′32.1″W</div>
+      <p class="oi-text">La mangrove fourmille, invisible, au cœur du quartier Canal. Véritable cité nourricière, elle est aujourd'hui dégradée par la proximité d'un monde qui la déborde. L'œuvre imagine le quartier dans sa forme originelle en prenant en compte le passage par la société de consommation. C'est l'utopie d'une nature qui se relève après le passage de l'humain.</p>
+    </div>
+  </div>
+  <div class="oeuvre-cell" onclick="lb(this)">
+    <img src="images/les-abymes.jpg" alt="Les Abymes">
+    <div class="map-pin"><img src="images/carte-abymes.png" alt="carte abymes"></div>
+    <div class="oeuvre-info">
+      <div class="oi-label">2073 · Martinique</div>
+      <div class="oi-title">Les Abymes</div>
+      <div class="oi-coords">14°48′14.6″N 61°13′37.1″W</div>
+      <p class="oi-text">Aux Abymes on ressent cette pression. La Montagne Pelée, le Lahar et la profondeur abyssale — des éléments sous tension. Au centre, une chaise chute vers les abysses. Des glaçons restent figés dans des verres, attendant d'être servis. Là où l'on attendrait des fruits : un bouquet de téléphones. Mondialisation et perte du lien aux lieux. "Bo Kai Nou."</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ PAGE 6 : CAP + CHARPENTIER ══ -->
+<section id="s6">
+  <div class="oeuvre-cell" onclick="lb(this)">
+    <img src="images/cap-macre.jpg" alt="Cap Macré">
+    <div class="map-pin"><img src="images/carte-cap.png" alt="carte cap"></div>
+    <div class="oeuvre-info">
+      <div class="oi-label">2073 · Martinique</div>
+      <div class="oi-title">Cap Macré — Anse Four à chaux</div>
+      <div class="oi-coords">14°28′31.7″N 60°48′49.3″W</div>
+      <p class="oi-text">Paysage subaquatique d'une dystopie. Du bouchon de bouteille à la machine à laver, les déchets racontent une relation consumée à la nature. Plage fréquentée, elle suscite l'envie de nombreux curieux. Ces espaces, voués à être transformés, attendent une réponse.</p>
+    </div>
+  </div>
+  <div class="oeuvre-cell" onclick="lb(this)">
+    <img src="images/anse-charpentier.jpg" alt="Anse Charpentier">
+    <div class="map-pin"><img src="images/carte-charpentier.png" alt="carte charp"></div>
+    <div class="oeuvre-info">
+      <div class="oi-label">2073 · Martinique</div>
+      <div class="oi-title">Anse Charpentier</div>
+      <div class="oi-coords">14°48′40.3″N 61°01′10.4″W</div>
+      <p class="oi-text">Pour la première fois dans la série, la silhouette humaine revient au centre — dans une danse mouvementée avec les déchets. Les gestes, inspirés du Bèlè, évoquent la puissance des éléments. Cette plage peu commode a réussi, singulièrement, à se préserver de l'intrusion humaine grâce à la négligence humaine elle-même.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ PAGE 7 : AIMÉ ══ -->
+<section id="s7">
+  <div class="ai-left">
+    <div class="ai-ey rv">Eaux de Boudin Moderne · Ruines Numériques · 2024</div>
+    <h2 class="ai-title rv d1">Aimé</h2>
+    <p class="ai-intro rv d2">Clin d'œil à Césaire — parce qu'il faut savoir apprécier la poésie.</p>
+    <p class="ai-body rv d2">Deux séries nées du même geste créatif. <em>Eaux de Boudin Moderne</em> explore le corps, la naissance et la manipulation à travers une colorimétrie hybride, entre organique et cyberpunk. <em>Ruines Numériques</em> met en scène une ville fragmentée, partiellement submergée, entre ruine réelle et projection spéculative. Ces œuvres partagent la même interrogation : quelle place pour la jeunesse antillaise dans un territoire insulaire traversé par la mondialisation, les mutations urbaines et les crises climatiques ?</p>
+  </div>
+
+</section>
+
+<!-- ══ PAGE 8 : RUINES NUMÉRIQUES ══ -->
+<section id="s8">
+  <div class="ruin-header">
+    <div class="ruin-h-top">
+      <div>
+        <div class="ey rv" style="margin-bottom:10px">Fort-de-France · 2024</div>
+        <div class="ruin-title rv d1">Ruines Numériques</div>
+      </div>
+    </div>
+  </div>
+  <div class="ruin-grid">
+    <div class="ruin-c" onclick="lb(this)"><span class="ruin-num">I</span><img src="images/ruines-i.jpg" alt="Ruines I"></div>
+    <div class="ruin-c" onclick="lb(this)"><span class="ruin-num">II</span><img src="images/ruines-ii.jpg" alt="Ruines II"></div>
+    <div class="ruin-c" onclick="lb(this)"><span class="ruin-num">III</span><img src="images/ruines-iii.jpg" alt="Ruines III"></div>
+  </div>
+  <div class="ruin-text-below rv">Triptyque réalisé à partir d'éléments architecturaux et urbains numérisés à Fort-de-France, assemblés à une figure humanoïde modélisée en 3D. L'œuvre met en scène une ville fragmentée, partiellement submergée, entre ruine réelle et projection spéculative. Les trois compositions convergent vers un même point central : les figures humaines, isolées sur des passerelles suspendues, tendent le doigt vers un espace invisible situé hors champ, au cœur du triptyque.<br><br>À travers cette mise en tension visuelle, l'œuvre interroge la place de la jeunesse antillaise dans un territoire insulaire traversé par les effets conjoints de la mondialisation, des mutations urbaines et des crises climatiques. Entre disparition, reconstruction et dérive numérique, ces paysages hybrides deviennent les vestiges possibles d'un futur en suspension.<br><br>La circulation de l'eau, l'effacement progressif des architectures et la présence solitaire du corps humain évoquent une mémoire collective fragile, oscillant entre ancrage territorial et perte de repères.</div>
+</section>
+
+<!-- ══ PAGE 9 : EAUX DE BOUDIN ══ -->
+<section id="s9">
+  <div class="bd-header">
+    <div class="ey rv" style="margin-bottom:10px">2024</div>
+    <div class="bd-title rv d1">Eaux de Boudin Moderne</div>
+    <p class="bd-desc rv d2">Entre matière organique et colorimétrie cyberpunk, une nouvelle vision du corps émerge. Un corps caribéen, mémoriel, traversé par les flux contradictoires du monde contemporain.</p>
+    <p class="bd-desc rv d2">La palette, cramoisi profond, magenta électrique, noir charbon, n'est pas décorative. Elle est la langue de cette cartographie intime : couleurs de sang, de néon, de nuit tropicale.</p>
+    <p class="bd-desc rv d2">Le corps 3D, sculpté, presque monochrome dans sa première vie, se complexifie d'œuvre en œuvre pour finalement se dissoudre dans le flot. Eaux de Boudin Moderne est une généalogie en trois temps. Naître. Porter. Disparaître dans le bruit. Et peut-être, recommencer.</p>
+  </div>
+  <div class="bd-grid">
+    <div class="bd-c" onclick="lb(this)"><img src="images/boudin-naissance.jpg" alt="Naissance">
+      <div class="bd-cap"><span class="bd-sub">Naissance</span><span class="bd-mini">I — Les multiples renaissances</span></div></div>
+    <div class="bd-c" onclick="lb(this)"><img src="images/boudin-eau.jpg" alt="L'eau de boudin">
+      <div class="bd-cap"><span class="bd-sub">L'eau de boudin</span><span class="bd-mini">III — La composition finale</span></div></div>
+    <div class="bd-c" onclick="lb(this)"><img src="images/boudin-manipulation.jpg" alt="Manipulation">
+      <div class="bd-cap"><span class="bd-sub">Manipulation</span><span class="bd-mini">II — Désinformation et corps</span></div></div>
+  </div>
+</section>
+
+<!-- ══ PAGE 10 : BIOGRAPHIE + OEUVRE SANS NOM ══ -->
+<section id="s10">
+  <div class="bio-img-col">
+    <img src="images/bio-aime.jpg" alt="Aimé prend l'eau">
+    <div class="bio-img-fade"></div>
+  </div>
+  <div class="bio-content">
+    <div class="ey rv">Biographie</div>
+    <h2 class="bio-name rv d1">Julie<br>Deweerdt</h2>
+    <div class="bio-birth rv d1">Née en Martinique · 1996</div>
+    <p class="bio-intro-text rv d2">Née en Martinique en 1996, Julie commence son parcours artistique à Lille en 2015, à la MANAA Maestris, avant de rejoindre l'École Supérieure d'Art de Tourcoing. C'est là qu'elle découvre l'art numérique et amorce un passage progressif vers la troisième dimension, qui vient enrichir et prolonger l'ensemble de sa pratique.</p>
+    <p class="bio-intro-text rv d2">En 2019, elle présente <em>Brain On</em> lors de l'exposition PRIST <em>Air fictions</em> — une installation holographique interrogeant l'addiction et la conscience de soi. Contenu dans une structure d'acier de 1 × 1 mètre, le dispositif invite le spectateur à insérer sa tête dans l'œuvre, abolissant la frontière entre corps et image.</p>
+    <p class="bio-intro-text rv d2">L'année suivante, <em>Mean World Syndrome</em> est présentée dans le cadre de l'exposition collective <em>Co-existence ?</em>. L'œuvre questionne notre rapport aux écrans et leurs effets sur les plus jeunes. Une projection sur tissu solidifié déforme la planéité de l'écran habituel — le volume devient métaphore de l'emprise du numérique sur nos perceptions.</p>
+    <p class="bio-intro-text rv d2">En septembre 2023, elle prend part à la résidence artistique 490, portée par la Station culturelle et soutenue par le BRGM, le Parc naturel marin et le Conservatoire du littoral — une expérience au croisement de l'art, des sciences et des territoires.</p>
+    <p class="bio-intro-text rv d2">C'est à cette période que l'intelligence artificielle s'impose comme un nouveau terrain d'expression, ouvrant des possibilités inédites de création visuelle. Portée par cet élan, Julie fonde Labo Studio — un studio de production visuelle spécialisé dans les contenus générés par IA, à destination de la publicité, du motion design et de l'art numérique. Dans la continuité, elle intègre ATV Martinique en tant que pilote IA, accompagnant la transformation des processus créatifs au sein de la chaîne.</p>
+    <p class="bio-intro-text rv d2">Le 25 avril 2024, elle présente ses œuvres au studio Lumina à Fort-de-France, dans le cadre de l'exposition collective <em>Tiens, voilà du boudin</em> — un projet porté avec Nicolas Derné, Arthur Francietta, Richard Meril, Gladys Gambie, Ludgi Savon et Jordan Beal. Une invitation à retrouver la création sans contraintes, au plus près des sources.</p>
+    <p class="bio-intro-text rv d2">Depuis novembre 2025, elle est établie à Dunkerque, où elle développe un nouveau projet artistique.</p>
+    <div class="tl rv">
+      <div class="tl-row"><span class="tl-y">2015</span><div class="tl-t"><strong>MANAA Maestris, Lille</strong>Formation artistique initiale</div></div>
+      <div class="tl-row"><span class="tl-y">2019</span><div class="tl-t"><strong>Brain On — PRIST, Air fictions</strong>Dispositif holographique immersif · Galerie Commune, Esä, Tourcoing</div></div>
+      <div class="tl-row"><span class="tl-y">2020</span><div class="tl-t"><strong>Mean World Syndrome</strong>Projection sur tissu solidifié · rapport aux écrans et à la surinformation visuelle</div></div>
+      <div class="tl-row"><span class="tl-y">2021</span><div class="tl-t"><strong>Master — Le Fresnoy × ÉSA Tourcoing</strong>Double cursus · Studio National des Arts Contemporains</div></div>
+      <div class="tl-row"><span class="tl-y">2023</span><div class="tl-t"><strong>Résidence artistique 490</strong>Série 2073 · Station Culturelle · BRGM · Parc naturel marin · Conservatoire du littoral</div></div>
+      <div class="tl-row"><span class="tl-y">2023</span><div class="tl-t"><strong>Fondatrice — Labo Studio, Martinique</strong>Studio IA · production publicitaire · pipelines génératifs</div></div>
+      <div class="tl-row"><span class="tl-y">2024</span><div class="tl-t"><strong>Tiens, voilà du boudin — Studio Lumina</strong>Exposition collective · Fort-de-France</div></div>
+      <div class="tl-row"><span class="tl-y">2024</span><div class="tl-t"><strong>Pilote IA — ATV Martinique</strong>Première chaîne privée · réseau Vià</div></div>
+    </div>
+    <a href="https://artimage-esanpdc.fr/2019/10/21/julie-deweerdt/" target="_blank" rel="noopener" class="bio-link rv">
+      <span>Voir l'article — Artimage ESA NPdC</span>
+      <span class="bio-link-arr">→</span>
+    </a>
+  </div>
+</section>
+
+<!-- ══ PAGE 11 : CONTACT ══ -->
+
+<section id="s11">
+  <div class="ct-img">
+    <img src="images/boudin-manipulation.jpg" alt="">
+    <div class="ct-img-fade"></div>
+  </div>
+  <div class="ct-content">
+    <h2 class="ct-big rv">Entrons<br>en<br><em>contact</em></h2>
+    <div class="ct-links">
+      <a href="mailto:laboratory.martinique@gmail.com" class="ct-a">
+        <div><div class="ct-a-lbl">Email</div><div class="ct-a-val">laboratory.martinique@gmail.com</div></div>
+        <span class="ct-a-arr">→</span>
+      </a>
+      <a href="tel:+33782833069" class="ct-a">
+        <div><div class="ct-a-lbl">Téléphone</div><div class="ct-a-val">+33 7 82 83 30 69</div></div>
+        <span class="ct-a-arr">→</span>
+      </a>
+      <a href="https://instagram.com/LABO.MARTINIQUE" target="_blank" class="ct-a">
+        <div><div class="ct-a-lbl">Instagram</div><div class="ct-a-val">@LABO.MARTINIQUE</div></div>
+        <span class="ct-a-arr">→</span>
+      </a>
+    </div>
+    <div class="qr-wrap rv">
+      <img src="images/qr-code.jpg" alt="QR code">
+      <span class="qr-txt">Scanner<br>pour contacter</span>
+    </div>
+  </div>
+</section>
+
+<!-- LIGHTBOX -->
+<div class="lb" id="lbx" onclick="clb()">
+  <button class="lb-x" onclick="clb()">Fermer ✕</button>
+  <img id="lbi" src="" alt="">
+</div>
+
+<script>
+// CURSOR
+const cr=document.getElementById('cr'),cr2=document.getElementById('cr2');
+let rx=0,ry=0,mx=0,my=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cr.style.left=mx+'px';cr.style.top=my+'px'});
+(function anim(){rx+=(mx-rx)*.1;ry+=(my-ry)*.1;cr2.style.left=rx+'px';cr2.style.top=ry+'px';requestAnimationFrame(anim)})();
+document.querySelectorAll('[onclick*="lb("]').forEach(el=>{
+  el.addEventListener('mouseenter',()=>document.body.classList.add('ptr'));
+  el.addEventListener('mouseleave',()=>document.body.classList.remove('ptr'));
+});
+
+// PAGE SNAP
+const secs=[...document.querySelectorAll('section')];
+const dots=[...document.querySelectorAll('.pd-d')];
+function gp(i){secs[i].scrollIntoView({behavior:'smooth'})}
+const io=new IntersectionObserver(e=>{
+  e.forEach(en=>{
+    if(en.isIntersecting){
+      en.target.classList.add('vi');
+      en.target.querySelectorAll('.rv').forEach(el=>el.classList.add('in'));
+      const i=secs.indexOf(en.target);
+      dots.forEach((d,j)=>d.classList.toggle('on',i===j));
+    }
+  });
+},{threshold:.4});
+secs.forEach(s=>io.observe(s));
+
+// LIGHTBOX
+function lb(el){const img=el.querySelector('img');document.getElementById('lbi').src=img.src;document.getElementById('lbx').classList.add('on');document.body.style.overflow='hidden'}
+function clb(){document.getElementById('lbx').classList.remove('on');document.body.style.overflow=''}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')clb()});
+</script>
+</body>
+</html>
