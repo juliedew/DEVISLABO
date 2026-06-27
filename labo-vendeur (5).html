@@ -1,0 +1,2318 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Labo Studio — Espace Vendeur</title>
+<style>
+  /* ============================================================
+     GESTION DES VENDEURS — MODIFIER ICI MANUELLEMENT
+     Format : { id, nom, prenom, email, password }
+     ============================================================ */
+
+  /* Les vendeurs sont définis dans le JS ci-dessous — chercher :
+     const VENDEURS = [ ... ]
+  */
+
+  /* ============================================================
+     DESIGN SYSTEM
+  ============================================================ */
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap');
+
+  :root {
+    --noir: #000000;
+    --noir-soft: #0d0d0d;
+    --surface: #141414;
+    --surface-2: #1c1c1c;
+    --border: #2a2a2a;
+    --border-light: #333;
+    --blanc: #ffffff;
+    --blanc-70: rgba(255,255,255,0.7);
+    --blanc-40: rgba(255,255,255,0.4);
+    --blanc-15: rgba(255,255,255,0.08);
+    --accent: #e8e0d0;
+    --accent-dim: rgba(232,224,208,0.6);
+    --vert: #4ade80;
+    --rouge: #f87171;
+    --gold: #c9a84c;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--noir);
+    color: var(--blanc);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ============================================================
+     ÉCRAN LOGIN
+  ============================================================ */
+  #screen-login {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+
+  .login-logo {
+    width: 72px;
+    height: 72px;
+    background: var(--blanc);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 32px;
+  }
+
+  .login-logo svg { width: 44px; height: 44px; }
+
+  .login-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px;
+    font-style: italic;
+    color: var(--blanc);
+    margin-bottom: 6px;
+    text-align: center;
+  }
+
+  .login-subtitle {
+    color: var(--blanc-40);
+    font-size: 13px;
+    margin-bottom: 40px;
+    text-align: center;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .login-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 36px;
+    width: 100%;
+    max-width: 380px;
+  }
+
+  .login-card label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--blanc-40);
+    margin-bottom: 8px;
+  }
+
+  .login-card input {
+    width: 100%;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    color: var(--blanc);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    margin-bottom: 20px;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  .login-card input:focus { border-color: var(--blanc-40); }
+
+  .btn-primary {
+    width: 100%;
+    background: var(--blanc);
+    color: var(--noir);
+    border: none;
+    border-radius: 8px;
+    padding: 13px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn-primary:hover { opacity: 0.88; }
+
+  .login-error {
+    color: var(--rouge);
+    font-size: 12px;
+    margin-top: 12px;
+    text-align: center;
+    display: none;
+  }
+
+  /* ============================================================
+     APP PRINCIPALE
+  ============================================================ */
+  #screen-app { display: none; }
+
+  /* Header */
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .header-logo {
+    width: 32px; height: 32px;
+    background: var(--blanc);
+    border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .header-logo svg { width: 20px; height: 20px; }
+
+  .header-name {
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: 18px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .header-vendor {
+    font-size: 12px;
+    color: var(--blanc-40);
+  }
+  .header-vendor span { color: var(--blanc-70); }
+
+  .btn-logout {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 14px;
+    color: var(--blanc-40);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn-logout:hover { border-color: var(--blanc-40); color: var(--blanc); }
+
+  /* Main layout */
+  .app-main {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* ============================================================
+     SÉLECTEUR DE PRESTATION
+  ============================================================ */
+  .prestation-selector {
+    margin-bottom: 48px;
+  }
+
+  .section-eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--blanc-40);
+    margin-bottom: 20px;
+  }
+
+  .prestation-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .prestation-card--soon {
+    opacity: 0.55;
+    cursor: default;
+  }
+
+  .prestation-card--promo {
+    opacity: 0.65;
+    border-style: dashed;
+    cursor: default;
+  }
+
+  .card-soon-badge {
+    display: inline-block;
+    margin-top: 12px;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--blanc-40);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px 10px;
+  }
+
+  .card-soon-badge--promo {
+    color: var(--gold);
+    border-color: rgba(201,168,76,0.3);
+  }
+
+  .prestation-card--formation {
+    border-color: rgba(232,224,208,0.2);
+    background: linear-gradient(135deg, var(--surface) 0%, rgba(232,224,208,0.04) 100%);
+  }
+  .prestation-card--formation:hover { border-color: rgba(232,224,208,0.4); }
+  .prestation-card--formation.active { border-color: var(--accent); }
+  .prestation-card--formation.active::after { background: var(--accent); }
+
+  .prestation-card--promo-active {
+    border-color: rgba(201,168,76,0.35);
+    background: linear-gradient(135deg, var(--surface) 0%, rgba(201,168,76,0.06) 100%);
+  }
+
+  .prestation-card--promo-active:hover {
+    border-color: rgba(201,168,76,0.6);
+  }
+
+  .prestation-card--promo-active.active {
+    border-color: var(--gold);
+  }
+
+  .prestation-card--promo-active.active::after {
+    background: var(--gold);
+  }
+
+  .card-promo-tag {
+    display: inline-block;
+    margin-top: 12px;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid rgba(201,168,76,0.35);
+    border-radius: 20px;
+    padding: 3px 10px;
+  }
+
+  .prestation-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .prestation-card:hover { border-color: var(--border-light); }
+
+  .prestation-card.active {
+    border-color: var(--blanc-40);
+    background: var(--surface-2);
+  }
+
+  .prestation-card.active::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--blanc);
+  }
+
+  .card-label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--blanc-40);
+    margin-bottom: 8px;
+  }
+
+  .card-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+
+  .card-desc {
+    font-size: 12px;
+    color: var(--blanc-70);
+    line-height: 1.5;
+  }
+
+  /* ============================================================
+     QUESTIONNAIRE
+  ============================================================ */
+  #questionnaire { display: none; }
+
+  .questionnaire-header {
+    margin-bottom: 36px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .q-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    margin-bottom: 6px;
+  }
+
+  .q-subtitle { color: var(--blanc-40); font-size: 13px; }
+
+  /* Sections du questionnaire */
+  .q-section {
+    margin-bottom: 40px;
+  }
+
+  .q-section-title {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--blanc-40);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .q-field { margin-bottom: 24px; }
+
+  .q-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--blanc-70);
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  /* Options radio/checkbox */
+  .options-grid {
+    display: grid;
+    gap: 8px;
+  }
+
+  .options-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+  .options-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  .option-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    text-align: left;
+  }
+
+  .option-btn:hover { border-color: var(--border-light); background: var(--surface-2); }
+
+  .option-btn.selected {
+    border-color: var(--blanc-40);
+    background: var(--surface-2);
+  }
+
+  .option-btn.selected .opt-dot {
+    background: var(--blanc);
+    border-color: var(--blanc);
+  }
+
+  .opt-dot {
+    width: 14px; height: 14px;
+    border: 1px solid var(--border-light);
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 2px;
+    transition: all 0.15s;
+  }
+
+  .opt-dot.square { border-radius: 3px; }
+
+  .opt-text { flex: 1; }
+
+  .opt-name {
+    font-size: 13px;
+    color: var(--blanc);
+    line-height: 1.3;
+  }
+
+  .opt-desc {
+    font-size: 11px;
+    color: var(--blanc-40);
+    margin-top: 2px;
+  }
+
+  .opt-price {
+    font-size: 11px;
+    color: var(--accent-dim);
+    margin-top: 2px;
+    font-weight: 500;
+  }
+
+  .opt-price.inclus { color: rgba(74,222,128,0.6); }
+
+  /* Input texte */
+  .q-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    color: var(--blanc);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    transition: border-color 0.2s;
+    outline: none;
+    resize: vertical;
+  }
+  .q-input:focus { border-color: var(--blanc-40); }
+  textarea.q-input { min-height: 80px; }
+
+  /* Prix en temps réel */
+  .price-bar {
+    position: sticky;
+    bottom: 24px;
+    background: var(--surface-2);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 40px;
+    backdrop-filter: blur(8px);
+    z-index: 50;
+  }
+
+  .price-label { font-size: 12px; color: var(--blanc-40); }
+  .price-total { font-family: 'DM Serif Display', serif; font-size: 28px; }
+  .price-plafond { font-size: 11px; color: var(--blanc-40); margin-top: 2px; }
+
+  .price-actions { display: flex; gap: 12px; align-items: center; }
+
+  .btn-reset {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 18px;
+    color: var(--blanc-40);
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+  }
+  .btn-reset:hover { border-color: var(--blanc-40); color: var(--blanc); }
+
+  .btn-devis {
+    background: var(--blanc);
+    color: var(--noir);
+    border: none;
+    border-radius: 8px;
+    padding: 11px 22px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    letter-spacing: 0.04em;
+  }
+  .btn-devis:hover { opacity: 0.85; }
+
+  /* ============================================================
+     MODAL DEVIS PDF
+  ============================================================ */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 200;
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    overflow-y: auto;
+    padding: 32px 16px;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 720px;
+    overflow: hidden;
+    margin: auto;
+  }
+
+  .modal-header {
+    padding: 24px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .modal-title { font-family: 'DM Serif Display', serif; font-size: 22px; }
+
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--blanc-40);
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s;
+  }
+  .modal-close:hover { color: var(--blanc); }
+
+  /* Zone devis imprimable */
+  #devis-preview {
+    padding: 36px 40px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .devis-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 2px solid var(--border-light);
+  }
+
+  .devis-logo-block { }
+  .devis-logo-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 24px;
+    font-style: italic;
+  }
+  .devis-logo-tagline { font-size: 11px; color: var(--blanc-40); margin-top: 2px; }
+
+  .devis-meta { text-align: right; }
+  .devis-meta .devis-num { font-size: 11px; color: var(--blanc-40); letter-spacing: 0.1em; }
+  .devis-meta .devis-date { font-size: 13px; margin-top: 4px; }
+  .devis-meta .devis-vendor { font-size: 11px; color: var(--blanc-40); margin-top: 2px; }
+
+  .devis-section { margin-bottom: 24px; }
+
+  .devis-section-title {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--blanc-40);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .devis-brief-grid {
+    display: grid;
+    gap: 6px;
+  }
+
+  .brief-row {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 12px;
+  }
+
+  .brief-key { color: var(--blanc-40); }
+  .brief-val { color: var(--blanc-70); }
+
+  /* Tableau financier */
+  .devis-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 12px;
+  }
+
+  .devis-table th {
+    text-align: left;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--blanc-40);
+    padding: 8px 12px;
+    background: var(--surface-2);
+    border-radius: 4px;
+  }
+
+  .devis-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: top;
+  }
+
+  .devis-table td:last-child { text-align: right; white-space: nowrap; }
+
+  .devis-total-block {
+    background: var(--surface-2);
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .total-item { }
+  .total-item-label {
+    font-size: 11px;
+    color: var(--blanc-40);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .total-item-val {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+  }
+  .total-item-val.gold { color: var(--gold); }
+  .total-item-val.vert { color: var(--vert); }
+
+  .devis-conditions {
+    font-size: 11px;
+    color: var(--blanc-40);
+    line-height: 1.7;
+    margin-top: 20px;
+    padding: 16px;
+    background: var(--surface-2);
+    border-radius: 8px;
+    border-left: 2px solid var(--border-light);
+  }
+
+  .devis-conditions strong { color: var(--blanc-70); }
+
+  .modal-footer {
+    padding: 20px 28px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+  }
+
+  /* ============================================================
+     RESPONSIVE
+  ============================================================ */
+  /* ── Formation ── */
+  .formation-module {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 24px;
+    padding-bottom: 48px;
+    margin-bottom: 48px;
+    border-bottom: 1px solid var(--border);
+  }
+  .formation-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px;
+    color: var(--blanc-15);
+    line-height: 1;
+    padding-top: 4px;
+    user-select: none;
+  }
+  .formation-module-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    margin-bottom: 10px;
+    line-height: 1.2;
+  }
+  .formation-module-intro {
+    font-size: 13px;
+    color: var(--blanc-70);
+    line-height: 1.75;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .formation-block {
+    margin-bottom: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 22px;
+  }
+  .formation-block--key { border-color: rgba(232,224,208,0.15); }
+  .formation-block--warning { border-color: rgba(201,168,76,0.2); background: rgba(201,168,76,0.03); }
+  .formation-block-label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--blanc-40);
+    margin-bottom: 16px;
+  }
+  .formation-items { display: grid; gap: 14px; }
+  .formation-item {
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .formation-item-icon {
+    font-size: 14px;
+    color: var(--accent-dim);
+    line-height: 1.4;
+  }
+  .formation-item-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--blanc);
+    margin-bottom: 4px;
+  }
+  .formation-item-desc {
+    font-size: 12px;
+    color: var(--blanc-40);
+    line-height: 1.65;
+  }
+  .formation-qa-grid { display: grid; gap: 10px; }
+  .formation-qa {
+    border-left: 2px solid var(--border-light);
+    padding-left: 14px;
+  }
+  .formation-q {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--blanc-70);
+    margin-bottom: 4px;
+  }
+  .formation-a {
+    font-size: 12px;
+    color: var(--blanc-40);
+    line-height: 1.65;
+  }
+  .formation-tip {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: rgba(232,224,208,0.04);
+    border: 1px dashed rgba(232,224,208,0.15);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-top: 16px;
+    font-size: 12px;
+    color: var(--blanc-70);
+    line-height: 1.65;
+  }
+  .formation-tip-icon { font-size: 16px; flex-shrink: 0; margin-top: -1px; }
+
+  @media (max-width: 640px) {
+    .prestation-grid { grid-template-columns: 1fr; }
+    .options-grid.cols-2 { grid-template-columns: 1fr; }
+    .options-grid.cols-3 { grid-template-columns: 1fr; }
+    .app-header { padding: 0 16px; }
+    .app-main { padding: 32px 16px 100px; }
+    .price-bar { flex-direction: column; gap: 12px; }
+    .devis-header { flex-direction: column; gap: 16px; }
+    .devis-table th:nth-child(2),
+    .devis-table td:nth-child(2) { display: none; }
+    #devis-preview { padding: 20px; }
+    .devis-total-block { grid-template-columns: 1fr 1fr; }
+    .brief-row { grid-template-columns: 140px 1fr; }
+    .total-item-val { font-size: 20px; }
+  }
+
+  /* ============================================================
+     PRINT
+  ============================================================ */
+  @media print {
+    body { background: white; color: black; }
+    .modal-overlay {
+      display: block !important;
+      position: static;
+      padding: 0;
+      background: none;
+    }
+    .modal-box {
+      border: none;
+      border-radius: 0;
+      max-width: 100%;
+    }
+    .modal-header, .modal-footer { display: none !important; }
+    #devis-preview {
+      padding: 20px;
+      color: black;
+    }
+    .devis-logo-name, .devis-section-title,
+    .devis-table th, .devis-table td,
+    .brief-key, .brief-val,
+    .total-item-label, .devis-conditions { color: black !important; }
+    .total-item-val { color: black !important; }
+    .devis-total-block, .devis-conditions { background: #f5f5f5 !important; border-color: #ddd !important; }
+    .devis-table { border: 1px solid #ddd; }
+    .devis-table td { border-color: #eee; }
+    #screen-login, #screen-app > *:not(.modal-overlay) { display: none !important; }
+  }
+
+  /* Utils */
+  .hidden { display: none !important; }
+  .text-dim { color: var(--blanc-40); }
+  .mt-8 { margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     ÉCRAN LOGIN
+============================================================ -->
+<div id="screen-login">
+  <div class="login-logo">
+    <svg viewBox="0 0 44 44" fill="none">
+      <rect x="8" y="28" width="28" height="3" rx="1.5" fill="black"/>
+      <path d="M22 8 L28 18 H16 Z" fill="black"/>
+      <circle cx="22" cy="8" r="2.5" fill="black"/>
+      <line x1="14" y1="8" x2="14" y2="3" stroke="black" stroke-width="2" stroke-linecap="round"/>
+      <line x1="22" y1="8" x2="22" y2="3" stroke="black" stroke-width="2" stroke-linecap="round"/>
+      <line x1="30" y1="8" x2="30" y2="3" stroke="black" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="login-title">Labo Studio</div>
+  <div class="login-subtitle">Espace vendeur</div>
+
+  <div class="login-card">
+    <label for="login-code">Code d'accès</label>
+    <input type="password" id="login-code" placeholder="••••••••" autocomplete="off" style="letter-spacing:0.18em;font-size:16px;">
+    <button class="btn-primary" onclick="doLogin()">Accéder</button>
+    <div class="login-error" id="login-error">Code incorrect.</div>
+  </div>
+</div>
+
+<!-- ============================================================
+     APP PRINCIPALE
+============================================================ -->
+<div id="screen-app">
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="header-logo">
+        <svg viewBox="0 0 20 20" fill="none">
+          <rect x="3" y="13" width="14" height="2" rx="1" fill="black"/>
+          <path d="M10 3 L13 8.5 H7 Z" fill="black"/>
+          <circle cx="10" cy="3" r="1.2" fill="black"/>
+          <line x1="6" y1="3" x2="6" y2="1" stroke="black" stroke-width="1.2" stroke-linecap="round"/>
+          <line x1="10" y1="3" x2="10" y2="1" stroke="black" stroke-width="1.2" stroke-linecap="round"/>
+          <line x1="14" y1="3" x2="14" y2="1" stroke="black" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="header-name">Labo</span>
+    </div>
+    <div class="header-right">
+      <div class="header-vendor">Connecté : <span id="vendor-display">—</span></div>
+      <button class="btn-logout" onclick="doLogout()">Déconnexion</button>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="app-main">
+
+    <!-- Sélecteur de prestation -->
+    <div class="prestation-selector">
+      <div class="section-eyebrow">Nouvelle commande — Choisissez une prestation</div>
+      <div class="prestation-grid">
+        <div class="prestation-card" id="card-spot" onclick="selectPrestation('spot')">
+          <div class="card-label">Publicité</div>
+          <div class="card-title">Je veux mon spot.</div>
+          <div class="card-desc">Spot publicitaire vidéo full IA, direction artistique humaine. À partir de 495€</div>
+        </div>
+        <div class="prestation-card" id="card-social" onclick="selectPrestation('social')">
+          <div class="card-label">Réseaux sociaux</div>
+          <div class="card-title">Gérer ma communication.</div>
+          <div class="card-desc">Contenus mensuels clé en main, livrés en dossier complet. À partir de 299€/mois</div>
+        </div>
+        <div class="prestation-card prestation-card--formation" id="card-formation" onclick="selectPrestation('formation')">
+          <div class="card-label" style="color:var(--accent-dim);">Formation vendeur</div>
+          <div class="card-title">Formation produit.</div>
+          <div class="card-desc">Maîtriser le brief, comprendre l'IA, vendre avec justesse.</div>
+        </div>
+        <div class="prestation-card prestation-card--promo-active" id="card-promo" onclick="selectPrestation('promo')">
+          <div class="card-label" style="color:var(--gold);opacity:1;">Offre promotionnelle</div>
+          <div class="card-title">Pack Promo 499€.</div>
+          <div class="card-desc">Spot vidéo <em>ou</em> pack contenu mensuel — tarif fixe tout inclus.</div>
+          <div class="card-promo-tag">Spot · Communication</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Questionnaire -->
+    <div id="questionnaire">
+      <div class="questionnaire-header">
+        <div class="q-title" id="q-title">—</div>
+        <div class="q-subtitle" id="q-subtitle">—</div>
+      </div>
+      <div id="q-content"></div>
+
+      <!-- Barre de prix -->
+      <div class="price-bar">
+        <div>
+          <div class="price-label">TOTAL ESTIMÉ</div>
+          <div class="price-total" id="price-display">0€</div>
+          <div class="price-plafond" id="price-plafond-info"></div>
+        </div>
+        <div class="price-actions">
+          <button class="btn-reset" onclick="resetForm()">Réinitialiser</button>
+          <button class="btn-devis" onclick="genererDevis()">Générer le devis →</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ============================================================
+     MODAL DEVIS
+============================================================ -->
+<div class="modal-overlay" id="modal-devis">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">Récapitulatif devis</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div id="devis-preview">
+      <!-- Généré dynamiquement -->
+    </div>
+    <div class="modal-footer">
+      <button class="btn-reset" onclick="closeModal()">Fermer</button>
+      <button class="btn-primary" style="width:auto;padding:11px 24px;" onclick="window.print()">
+        Télécharger / Imprimer
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================================================================
+   ████████████████████████████████████████████████████████████████
+   GESTION DES VENDEURS — MODIFIER ICI
+   ████████████████████████████████████████████████████████████████
+   Format : { id, nom, prenom, email, password }
+   Ajoutez, modifiez ou supprimez des lignes selon vos besoins.
+   ================================================================ */
+const VENDEURS = [
+  { id: 1, prenom: "Julie",    nom: "",  code: "JULIE2026" },
+  { id: 2, prenom: "Samantha", nom: "",  code: "SAMANTHA2026" },
+  { id: 3, prenom: "Rayan",    nom: "",  code: "RAYAN2026" },
+  { id: 4, prenom: "Tom",      nom: "",  code: "TOM2026" },
+];
+/* ================================================================
+   FIN DE LA SECTION VENDEURS
+   ================================================================ */
+
+/* ================================================================
+   ÉTAT GLOBAL
+   ================================================================ */
+let currentVendor = null;
+let currentPrestation = null;
+let formState = {};
+
+/* ================================================================
+   AUTH
+   ================================================================ */
+function doLogin() {
+  const code = document.getElementById('login-code').value.trim().toUpperCase();
+  const vendor = VENDEURS.find(v => v.code === code);
+  if (!vendor) {
+    document.getElementById('login-error').style.display = 'block';
+    return;
+  }
+  currentVendor = vendor;
+  document.getElementById('login-error').style.display = 'none';
+  document.getElementById('screen-login').style.display = 'none';
+  document.getElementById('screen-app').style.display = 'block';
+  document.getElementById('vendor-display').textContent = vendor.prenom;
+}
+
+document.getElementById('login-code').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+function doLogout() {
+  currentVendor = null;
+  currentPrestation = null;
+  formState = {};
+  document.getElementById('screen-app').style.display = 'none';
+  document.getElementById('screen-login').style.display = 'flex';
+  document.getElementById('login-code').value = '';
+}
+
+/* ================================================================
+   SÉLECTION PRESTATION
+   ================================================================ */
+function selectPrestation(type) {
+  // Réafficher la price-bar si on revient d'une formation
+  const bar = document.querySelector('.price-bar');
+  if (bar) bar.style.display = type === 'formation' ? 'none' : 'flex';
+
+  currentPrestation = type;
+  formState = {};
+  document.querySelectorAll('.prestation-card').forEach(c => c.classList.remove('active'));
+  document.getElementById('card-' + type).classList.add('active');
+
+  document.getElementById('questionnaire').style.display = 'block';
+  setTimeout(() => {
+    document.getElementById('questionnaire').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
+
+  if (type === 'spot') renderSpot();
+  else if (type === 'promo') renderPromo();
+  else if (type === 'formation') renderFormation();
+  else renderSocial();
+}
+
+/* ================================================================
+   HELPERS RENDU
+   ================================================================ */
+function h(tag, cls, content) {
+  return `<${tag} class="${cls}">${content}</${tag}>`;
+}
+
+function renderRadio(fieldKey, options, cols = 1) {
+  const colClass = cols === 2 ? 'cols-2' : cols === 3 ? 'cols-3' : '';
+  return `<div class="options-grid ${colClass}">` +
+    options.map(o => {
+      const priceHtml = o.price !== undefined
+        ? `<div class="opt-price ${o.price === 0 ? 'inclus' : ''}">${o.price === 0 ? '✓ inclus' : '+' + o.price + '€'}</div>`
+        : '';
+      return `<div class="option-btn" data-field="${fieldKey}" data-value="${o.value}" data-price="${o.price ?? 0}" data-label="${o.label}" onclick="selectOption(this, '${fieldKey}', 'radio')">
+        <div class="opt-dot"></div>
+        <div class="opt-text">
+          <div class="opt-name">${o.label}</div>
+          ${o.desc ? `<div class="opt-desc">${o.desc}</div>` : ''}
+          ${priceHtml}
+        </div>
+      </div>`;
+    }).join('') + '</div>';
+}
+
+function renderCheckbox(fieldKey, options, cols = 1) {
+  const colClass = cols === 2 ? 'cols-2' : cols === 3 ? 'cols-3' : '';
+  return `<div class="options-grid ${colClass}">` +
+    options.map(o => {
+      const priceHtml = o.price !== undefined
+        ? `<div class="opt-price ${o.price === 0 ? 'inclus' : ''}">${o.price === 0 ? '✓ inclus' : '+' + o.price + '€'}</div>`
+        : '';
+      return `<div class="option-btn" data-field="${fieldKey}" data-value="${o.value}" data-price="${o.price ?? 0}" data-label="${o.label}" onclick="selectOption(this, '${fieldKey}', 'checkbox')">
+        <div class="opt-dot square"></div>
+        <div class="opt-text">
+          <div class="opt-name">${o.label}</div>
+          ${o.desc ? `<div class="opt-desc">${o.desc}</div>` : ''}
+          ${priceHtml}
+        </div>
+      </div>`;
+    }).join('') + '</div>';
+}
+
+function renderInput(fieldKey, placeholder = '', type = 'text', isTextarea = false) {
+  if (isTextarea) {
+    return `<textarea class="q-input" id="field-${fieldKey}" placeholder="${placeholder}" oninput="setTextValue('${fieldKey}', this.value)"></textarea>`;
+  }
+  return `<input type="${type}" class="q-input" id="field-${fieldKey}" placeholder="${placeholder}" oninput="setTextValue('${fieldKey}', this.value)">`;
+}
+
+function field(label, content) {
+  return `<div class="q-field"><label class="q-label">${label}</label>${content}</div>`;
+}
+
+function section(title, content) {
+  return `<div class="q-section"><div class="q-section-title">${title}</div>${content}</div>`;
+}
+
+/* ================================================================
+   INTERACTIONS
+   ================================================================ */
+function selectOption(el, fieldKey, mode) {
+  if (mode === 'radio') {
+    document.querySelectorAll(`[data-field="${fieldKey}"]`).forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    formState[fieldKey] = [{
+      value: el.dataset.value,
+      label: el.dataset.label,
+      price: parseFloat(el.dataset.price) || 0
+    }];
+  } else {
+    el.classList.toggle('selected');
+    if (!formState[fieldKey]) formState[fieldKey] = [];
+    const existing = formState[fieldKey].findIndex(x => x.value === el.dataset.value);
+    if (el.classList.contains('selected')) {
+      if (existing === -1) formState[fieldKey].push({
+        value: el.dataset.value,
+        label: el.dataset.label,
+        price: parseFloat(el.dataset.price) || 0
+      });
+    } else {
+      if (existing > -1) formState[fieldKey].splice(existing, 1);
+    }
+  }
+  calcTotal();
+}
+
+function setTextValue(fieldKey, val) {
+  formState[fieldKey] = val;
+}
+
+function getVal(fieldKey) {
+  const v = formState[fieldKey];
+  if (!v) return null;
+  if (Array.isArray(v)) return v.length > 0 ? v[0] : null;
+  return v;
+}
+
+function getCheckboxVals(fieldKey) {
+  return formState[fieldKey] || [];
+}
+
+/* ================================================================
+   CALCUL PRIX — SPOT
+   ================================================================ */
+const PLAFOND_SPOT   = 1999;
+const PLAFOND_SOCIAL = 999;
+const BASE_SPOT   = 495;
+const BASE_SOCIAL = 299;
+
+function calcSpotTotal() {
+  let total = BASE_SPOT;
+  const addPrice = (key) => {
+    const v = formState[key];
+    if (Array.isArray(v)) v.forEach(x => total += (x.price || 0));
+    return;
+  };
+  addPrice('voix');
+  addPrice('musique');
+  addPrice('duree');
+  addPrice('personnages');
+  addPrice('langue');
+  addPrice('delai');
+  addPrice('style');
+  addPrice('finition');
+  addPrice('logo_spot');
+  addPrice('prise_vue_spot');
+
+  // Format "tous formats" = x2
+  const fmt = formState['format'];
+  if (fmt && fmt[0] && fmt[0].value === 'tous') {
+    total = total * 2;
+  }
+
+  return Math.min(total, PLAFOND_SPOT);
+}
+
+function calcSocialTotal() {
+  let total = BASE_SOCIAL;
+  const addPrice = (key) => {
+    const v = formState[key];
+    if (Array.isArray(v)) v.forEach(x => total += (x.price || 0));
+  };
+  addPrice('freq_pub');
+  addPrice('stories');
+  addPrice('types_contenu');
+  addPrice('elements_fournis');
+  addPrice('logo_social');
+  addPrice('prise_vue_social');
+  addPrice('situation_rs');
+
+  // Remise formule
+  const formule = getVal('formule');
+  let remise = 0;
+  if (formule) {
+    if (formule.value === 'trimestriel') remise = 0.10;
+    if (formule.value === 'annuel') remise = 0.20;
+  }
+
+  // Frais logo (1er mois seulement, pas soumis à remise)
+  // Si identité graphique incluse (situation_rs = zero), pas de frais logo supplémentaires
+  const identiteIncluse = formState['situation_rs'] && formState['situation_rs'][0] && formState['situation_rs'][0].value === 'zero';
+  const logoFrais = (() => {
+    if (identiteIncluse) return 0; // logo créé dans le cadre de l'identité graphique
+    const l = formState['logo_social'];
+    if (!l || !l[0]) return 0;
+    if (l[0].value === 'basse') return 50;
+    if (l[0].value === 'sans') return 80;
+    return 0;
+  })();
+
+  const totalAvantRemise = total - logoFrais;
+  const totalApresRemise = Math.round(totalAvantRemise * (1 - remise));
+  return Math.min(totalApresRemise + logoFrais, PLAFOND_SOCIAL);
+}
+
+function calcTotal() {
+  if (!currentPrestation) return;
+  const total = currentPrestation === 'spot' ? calcSpotTotal() : currentPrestation === 'promo' ? calcPromoTotal() : currentPrestation === 'formation' ? 0 : calcSocialTotal();
+  const plafond = currentPrestation === 'spot' ? PLAFOND_SPOT : currentPrestation === 'promo' ? PRIX_PROMO : currentPrestation === 'formation' ? 0 : PLAFOND_SOCIAL;
+
+  document.getElementById('price-display').textContent = total + '€';
+
+  const info = document.getElementById('price-plafond-info');
+  if (total >= plafond) {
+    info.textContent = `Plafond atteint — ${plafond}€ max`;
+    info.style.color = 'var(--gold)';
+  } else {
+    info.textContent = currentPrestation === 'social' ? '/mois' : '';
+    info.style.color = 'var(--blanc-40)';
+  }
+}
+
+/* ================================================================
+   QUESTIONNAIRE SPOT
+   ================================================================ */
+function renderSpot() {
+  document.getElementById('q-title').textContent = 'Spot publicitaire IA';
+  document.getElementById('q-subtitle').textContent = 'Remplissez les informations client pour générer le devis.';
+
+  const html = `
+    ${section('Informations client', `
+      ${field('Nom de l\'entreprise', renderInput('entreprise', 'Ex: Boulangerie Martin'))}
+      ${field('Email du client', renderInput('email_client', 'client@exemple.fr', 'email'))}
+      ${field('Téléphone', renderInput('tel_client', '+596 696 00 00 00', 'tel'))}
+      ${field('Slogan ou message clé', renderInput('slogan', 'Votre slogan...', 'text'))}
+    `)}
+
+    ${section('Le projet', `
+      ${field('Secteur d\'activité', renderRadio('secteur', [
+        { value: 'food', label: 'Restauration / Food' },
+        { value: 'retail', label: 'Commerce / Retail' },
+        { value: 'beaute', label: 'Beauté / Bien-être' },
+        { value: 'immo', label: 'Immobilier' },
+        { value: 'auto', label: 'Automobile' },
+        { value: 'sante', label: 'Santé / Médical' },
+        { value: 'services', label: 'Services / Artisanat' },
+        { value: 'autre', label: 'Autre' },
+      ], 2))}
+
+      ${field('Objectif principal', renderRadio('objectif', [
+        { value: 'notoriete', label: 'Notoriété', desc: 'Faire connaître ma marque' },
+        { value: 'promo', label: 'Promotion / Offre', desc: 'Mettre en avant une offre' },
+        { value: 'ouverture', label: 'Ouverture / Lancement', desc: 'Nouveau produit ou ouverture' },
+        { value: 'recrutement', label: 'Recrutement', desc: 'Attirer des candidats' },
+        { value: 'evenement', label: 'Événement', desc: 'Concert, vente, inauguration...' },
+      ], 2))}
+
+      ${field('Cible principale', renderRadio('cible', [
+        { value: 'local', label: 'Clientèle locale' },
+        { value: 'familles', label: 'Familles' },
+        { value: '1835', label: '18-35 ans' },
+        { value: 'pro', label: 'Professionnels / B2B' },
+        { value: 'seniors', label: 'Seniors' },
+        { value: 'gp', label: 'Grand public' },
+      ], 2))}
+
+      ${field('Délai de livraison du spot', renderRadio('delai_projet', [
+        { value: '2sem', label: 'Dans les 2 semaines', desc: 'Prioritaire' },
+        { value: '1mois', label: 'Dans le mois' },
+        { value: '2-3mois', label: 'Dans 2-3 mois' },
+        { value: 'libre', label: 'Pas de date fixe' },
+      ], 2))}
+    `)}
+
+    ${section('Le contenu', `
+      ${field('Message principal', renderInput('message_principal', 'Décrivez le message à transmettre...', 'text', true))}
+
+      ${field('Ton du spot', renderRadio('ton', [
+        { value: 'dynamique', label: 'Dynamique', desc: 'Énergique, punchy' },
+        { value: 'chaleureux', label: 'Chaleureux', desc: 'Proche, humain' },
+        { value: 'premium', label: 'Premium', desc: 'Élégant, haut de gamme' },
+        { value: 'humor', label: 'Humoristique', desc: 'Fun, décalé' },
+        { value: 'info', label: 'Informatif', desc: 'Clair, factuel' },
+        { value: 'emo', label: 'Émotionnel', desc: 'Touchant, inspirant' },
+      ], 2))}
+
+      ${field('Voix off', renderRadio('voix', [
+        { value: 'humaine', label: 'Voix humaine', desc: 'Comédien professionnel', price: 180 },
+        { value: 'ia', label: 'Voix IA', desc: 'Synthèse vocale haute qualité', price: 0 },
+        { value: 'aucune', label: 'Non — texte animé uniquement', price: 0 },
+      ]))}
+
+      ${field('Texte de la voix off', renderInput('texte_voix', 'Collez ici le texte de voix off...', 'text', true))}
+
+      ${field('Musique / ambiance sonore', renderRadio('musique', [
+        { value: 'biblio', label: 'Bibliothèque musicale', desc: 'Sélection dans notre catalogue', price: 0 },
+        { value: 'compo', label: 'Composition sur mesure', desc: 'Créée spécialement pour vous', price: 400 },
+        { value: 'client', label: 'Je fournis ma musique', price: 0 },
+        { value: 'sans', label: 'Sans musique', price: 0 },
+      ], 2))}
+    `)}
+
+    ${section('La technique', `
+      ${field('Durée du spot', renderRadio('duree', [
+        { value: '15', label: '15 secondes', desc: 'Réseaux sociaux — base', price: 0 },
+        { value: '30', label: '30 secondes', desc: 'Web / Radio', price: 150 },
+        { value: '45', label: '45 secondes', desc: 'Storytelling court', price: 250 },
+        { value: '60', label: '60 secondes', desc: 'Spot complet', price: 350 },
+      ], 2))}
+
+      ${field('Format de diffusion', renderRadio('format', [
+        { value: 'stories', label: 'Stories / Reels — 9:16', price: 0 },
+        { value: 'youtube', label: 'YouTube / Web — 16:9', price: 0 },
+        { value: 'feed', label: 'Feed Instagram — 1:1', price: 0 },
+        { value: 'tv', label: 'TV / Cinéma — Broadcast HD', price: 0 },
+        { value: 'tous', label: 'Tous formats', desc: 'Adaptations incluses — ×2 du tarif', price: 0 },
+      ], 2))}
+
+      ${field('Personnages / avatars IA', renderRadio('personnages', [
+        { value: 'aucun', label: 'Aucun personnage', desc: 'Ambiance, produit, texte animé', price: 0 },
+        { value: '1', label: '1 personnage', price: 100 },
+        { value: '2-3', label: '2 à 3 personnages', price: 250 },
+        { value: '4+', label: '4 personnages et plus', price: 400 },
+      ], 2))}
+
+      ${field('Langue(s)', renderRadio('langue', [
+        { value: 'fr', label: 'Français', price: 0 },
+        { value: 'en', label: 'Anglais', price: 0 },
+        { value: 'fr-en', label: 'Français + Anglais', price: 150 },
+        { value: 'autre', label: 'Autre langue', price: 150 },
+      ], 2))}
+
+      ${field('Délai de production', renderRadio('delai', [
+        { value: 'standard', label: 'Standard — 10 jours ouvrés', price: 0 },
+        { value: 'urgent', label: 'Urgent — 5 jours ouvrés', price: 200 },
+        { value: 'express', label: 'Express — 48h', price: 400 },
+      ]))}
+    `)}
+
+    ${section('Le visuel', `
+      ${field('Style visuel', renderRadio('style', [
+        { value: 'realiste', label: 'Réaliste / Cinématique', price: 0 },
+        { value: 'anime2d', label: 'Animé 2D', price: 100 },
+        { value: '3d', label: '3D / Motion design', price: 200 },
+        { value: 'mixte', label: 'Mixte réel + animation', price: 150 },
+        { value: 'minimal', label: 'Minimaliste / Épuré', price: 0 },
+        { value: 'vintage', label: 'Vintage / Rétro', price: 0 },
+      ], 2))}
+
+      ${field('Couleurs de la marque', renderInput('couleurs', 'Ex: rouge, or, blanc...'))}
+      ${field('Références ou inspirations visuelles', renderInput('inspirations', 'URL, noms de marques, descriptions...', 'text', true))}
+
+      ${field('Niveau de finition', renderRadio('finition', [
+        { value: 'essentiel', label: 'Essentiel', desc: 'Efficace — 2 révisions incluses', price: 0 },
+        { value: 'premium', label: 'Premium', desc: 'Effets avancés — 4 révisions', price: 299 },
+        { value: 'prestige', label: 'Prestige', desc: 'Direction artistique — révisions illimitées', price: 499 },
+      ]))}
+    `)}
+
+    ${section('Logo & fichiers', `
+      ${field('Vous avez un logo ?', renderRadio('logo_spot', [
+        { value: 'hd', label: 'Oui — PNG/SVG haute résolution', desc: 'On l\'intègre directement', price: 0 },
+        { value: 'basse', label: 'Oui — basse résolution', desc: 'On recrée ou retravaille', price: 80 },
+        { value: 'sans', label: 'Non — pas de logo', desc: 'On crée un logotype pour le spot', price: 150 },
+      ]))}
+    `)}
+  `;
+
+  document.getElementById('q-content').innerHTML = html;
+  calcTotal();
+}
+
+/* ================================================================
+   QUESTIONNAIRE COMMUNICATION MENSUELLE
+   ================================================================ */
+function renderSocial() {
+  document.getElementById('q-title').textContent = 'Communication mensuelle';
+  document.getElementById('q-subtitle').textContent = 'Contenus mensuels clé en main, livrés en dossier complet + book de présentation.';
+
+  const html = `
+    ${section('Informations client', `
+      ${field('Nom de l\'entreprise', renderInput('entreprise', 'Ex: Restaurant La Savane'))}
+      ${field('Email du client', renderInput('email_client', 'client@exemple.fr', 'email'))}
+      ${field('Téléphone', renderInput('tel_client', '+596 696 00 00 00', 'tel'))}
+    `)}
+
+    ${section('Votre activité', `
+      ${field('Secteur d\'activité', renderRadio('secteur', [
+        { value: 'food', label: 'Restauration / Food' },
+        { value: 'retail', label: 'Commerce / Retail' },
+        { value: 'beaute', label: 'Beauté / Bien-être' },
+        { value: 'immo', label: 'Immobilier' },
+        { value: 'auto', label: 'Automobile' },
+        { value: 'sante', label: 'Santé / Médical' },
+        { value: 'services', label: 'Services / Artisanat' },
+        { value: 'autre', label: 'Autre — préciser ci-dessous' },
+      ], 2))}
+      <div id="secteur-autre-wrap" style="margin-top:-12px;margin-bottom:20px;display:none;">
+        <input type="text" class="q-input" id="field-secteur_autre" placeholder="Précisez votre secteur d'activité..." oninput="setTextValue('secteur_autre', this.value)">
+      </div>
+
+      ${field('Situation des réseaux sociaux actuels', renderRadio('situation_rs', [
+        { value: 'actif', label: 'Actif — je publie déjà régulièrement', desc: 'Nous prenons la suite en harmonie' },
+        { value: 'peu', label: 'Peu actif — quelques publications', desc: 'Nous relançons et homogénéisons' },
+        { value: 'inactif', label: 'Compte existant mais inactif', desc: 'Nous repartons de zéro visuellement' },
+        { value: 'zero', label: 'Aucun compte — création d\'identité graphique + stratégie', desc: '+100€ (1er mois)', price: 100 },
+      ], 2))}
+
+      ${field('Cible principale', renderRadio('cible', [
+        { value: 'local', label: 'Clientèle locale' },
+        { value: 'familles', label: 'Familles' },
+        { value: '1835', label: '18-35 ans' },
+        { value: 'pro', label: 'Professionnels / B2B' },
+        { value: 'seniors', label: 'Seniors' },
+        { value: 'gp', label: 'Grand public' },
+      ], 2))}
+
+      ${field('Objectif principal', renderRadio('objectif', [
+        { value: 'notoriete', label: 'Notoriété & visibilité', desc: 'Faire connaître et développer la marque' },
+        { value: 'engagement', label: 'Engagement & communauté', desc: 'Créer du lien avec vos abonnés' },
+        { value: 'ventes', label: 'Ventes & conversions', desc: 'Générer des achats ou des contacts' },
+        { value: 'mix', label: 'Mix des trois', desc: 'Stratégie équilibrée' },
+      ], 2))}
+    `)}
+
+    ${section('Le contenu', `
+      ${field('Types de contenus souhaités (choix multiple)', renderCheckbox('types_contenu', [
+        { value: 'produit', label: 'Mise en avant produit', desc: 'Visuels produits / services', price: 0 },
+        { value: 'humour', label: 'BD & humour', desc: 'Contenu décalé, fun', price: 0 },
+        { value: 'promos', label: 'Promotions & offres', desc: 'Soldes, bons plans', price: 0 },
+        { value: 'events', label: 'Événements', desc: 'Ouvertures, foires, dates', price: 0 },
+        { value: 'coulisses', label: 'Coulisses', desc: 'Vie de l\'équipe', price: 0 },
+        { value: 'temoignages', label: 'Témoignages clients', desc: 'Avis, success stories', price: 0 },
+        { value: 'conseils', label: 'Conseils & expertise', desc: 'Tips, tutos, infos', price: 0 },
+        { value: 'saisonnier', label: 'Saisonnier / Actualité', desc: 'Fêtes, tendances', price: 0 },
+      ], 2))}
+
+      ${field('Ton éditorial', renderRadio('ton', [
+        { value: 'pro', label: 'Professionnel', desc: 'Sérieux, expert' },
+        { value: 'chaleureux', label: 'Chaleureux', desc: 'Proche, humain' },
+        { value: 'fun', label: 'Fun & décalé', desc: 'Humour, légèreté' },
+        { value: 'premium', label: 'Premium', desc: 'Luxe, raffinement' },
+        { value: 'local', label: 'Local & authentique', desc: 'Ancrage territoire' },
+        { value: 'inspirant', label: 'Inspirant', desc: 'Citations, lifestyle' },
+      ], 2))}
+    `)}
+
+    ${section('Les réseaux', `
+      ${field('Réseaux ciblés (choix multiple — Instagram inclus)', renderCheckbox('reseaux', [
+        { value: 'instagram', label: 'Instagram — Feed + Stories', price: 0 },
+        { value: 'facebook', label: 'Facebook — Page + Stories', price: 30 },
+        { value: 'tiktok', label: 'TikTok — Vidéos courtes', price: 50 },
+        { value: 'linkedin', label: 'LinkedIn — Posts professionnels', price: 40 },
+        { value: 'youtube', label: 'YouTube — Shorts + vidéos', price: 80 },
+      ], 2))}
+
+      ${field('Fréquence de publication / mois (feed)', renderRadio('freq_pub', [
+        { value: '4', label: '4 publications', desc: '1 par semaine — inclus', price: 0 },
+        { value: '8', label: '8 publications', desc: '2 par semaine', price: 80 },
+        { value: '12', label: '12 publications', desc: '3 par semaine', price: 160 },
+        { value: '16', label: '16 publications', desc: '4 par semaine', price: 240 },
+      ], 2))}
+
+      ${field('Stories / Reels par mois', renderRadio('stories', [
+        { value: '0', label: 'Aucune story', price: 0 },
+        { value: '4', label: '4 stories ou reels', price: 60 },
+        { value: '8', label: '8 stories ou reels', price: 110 },
+        { value: '12', label: '12 stories ou reels', price: 160 },
+      ], 2))}
+    `)}
+
+    ${section('Vos éléments & formule', `
+      ${field('Éléments que vous pouvez fournir (choix multiple)', renderCheckbox('elements_fournis', [
+        { value: 'photos', label: 'Photographies', desc: 'Photos produits / lieu', price: 0 },
+        { value: 'videos', label: 'Vidéos', desc: 'Rushes bruts', price: 0 },
+        { value: 'events_info', label: 'Infos événements', desc: 'Dates, descriptions', price: 0 },
+        { value: 'promos_info', label: 'Infos promotions', desc: 'Offres, réductions', price: 0 },
+        { value: 'charte', label: 'Logo + charte', desc: 'Identité visuelle', price: 0 },
+        { value: 'rien', label: 'Rien — création complète', desc: 'On gère tout', price: 100 },
+      ], 2))}
+
+      ${field('Formule d\'engagement', renderRadio('formule', [
+        { value: 'mensuel', label: 'Mois par mois', desc: 'Sans engagement — tarif plein' },
+        { value: 'trimestriel', label: 'Trimestriel', desc: 'Engagement 3 mois — contrat à signer — remise 10%' },
+        { value: 'annuel', label: 'Annuel', desc: 'Engagement 12 mois — contrat à signer — remise 20%' },
+      ]))}
+
+      ${field('Logo', renderRadio('logo_social', [
+        { value: 'hd', label: 'Oui — PNG/SVG haute résolution', price: 0 },
+        { value: 'basse', label: 'Oui — basse résolution', desc: 'Retravail facturé 1er mois +50€', price: 0 },
+        { value: 'sans', label: 'Non — pas de logo', desc: 'Création facturée 1er mois +80€', price: 0 },
+      ]))}
+    `)}
+  `;
+
+  document.getElementById('q-content').innerHTML = html;
+  calcTotal();
+  // Afficher/masquer champ "autre secteur"
+  document.querySelectorAll('[data-field="secteur"]').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const wrap = document.getElementById('secteur-autre-wrap');
+      if (wrap) wrap.style.display = this.dataset.value === 'autre' ? 'block' : 'none';
+    });
+  });
+}
+
+/* ================================================================
+   RESET
+   ================================================================ */
+/* ================================================================
+   OFFRE PROMOTIONNELLE
+   ================================================================ */
+const PRIX_PROMO = 499;
+
+function calcPromoTotal() { return PRIX_PROMO; }
+
+function renderPromo() {
+  document.getElementById('q-title').textContent = 'Offre promotionnelle — 499€ fixe';
+  document.getElementById('q-subtitle').textContent = 'Deux formules au tarif unique. Choisissez le type de pack puis remplissez le brief client.';
+
+  const html = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:32px;">
+      <div class="option-btn ${formState['type_promo'] && formState['type_promo'][0].value==='spot_promo' ? 'selected' : ''}"
+           data-field="type_promo" data-value="spot_promo" data-price="0" data-label="Promo Spot Vidéo"
+           onclick="selectOption(this,'type_promo','radio');renderPromoFields();">
+        <div class="opt-dot"></div>
+        <div class="opt-text">
+          <div class="opt-name" style="font-weight:600;">Promo Spot Vidéo</div>
+          <div class="opt-desc">25 sec · Voix IA · 2 zooms produit · 1920×1080 ou 1080×1920</div>
+        </div>
+      </div>
+      <div class="option-btn ${formState['type_promo'] && formState['type_promo'][0].value==='comm_promo' ? 'selected' : ''}"
+           data-field="type_promo" data-value="comm_promo" data-price="0" data-label="Promo Communication"
+           onclick="selectOption(this,'type_promo','radio');renderPromoFields();">
+        <div class="opt-dot"></div>
+        <div class="opt-text">
+          <div class="opt-name" style="font-weight:600;">Promo Communication</div>
+          <div class="opt-desc">4 posts · 4 stories · 1 réel 25 sec · Formats adaptés au(x) réseau(x) choisi(s)</div>
+        </div>
+      </div>
+    </div>
+    <div id="promo-fields"></div>
+  `;
+
+  document.getElementById('q-content').innerHTML = html;
+  calcTotal();
+  renderPromoFields();
+}
+
+function renderPromoFields() {
+  const container = document.getElementById('promo-fields');
+  if (!container) return;
+  const type = formState['type_promo'] && formState['type_promo'][0] ? formState['type_promo'][0].value : null;
+  if (!type) { container.innerHTML = ''; return; }
+
+  if (type === 'spot_promo') {
+    container.innerHTML = `
+      ${section('Informations client', `
+        ${field('Nom de l\'entreprise', renderInput('entreprise', 'Ex: Boulangerie Martin'))}
+        ${field('Email du client', renderInput('email_client', 'client@exemple.fr', 'email'))}
+        ${field('Téléphone', renderInput('tel_client', '+596 696 00 00 00', 'tel'))}
+      `)}
+
+      ${section('Le projet', `
+        ${field('Secteur d\'activité', renderRadio('secteur', [
+          { value: 'food', label: 'Restauration / Food' },
+          { value: 'retail', label: 'Commerce / Retail' },
+          { value: 'beaute', label: 'Beauté / Bien-être' },
+          { value: 'immo', label: 'Immobilier' },
+          { value: 'auto', label: 'Automobile' },
+          { value: 'sante', label: 'Santé / Médical' },
+          { value: 'services', label: 'Services / Artisanat' },
+          { value: 'autre', label: 'Autre' },
+        ], 2))}
+
+        ${field('Objectif principal', renderRadio('objectif', [
+          { value: 'notoriete', label: 'Notoriété', desc: 'Faire connaître la marque' },
+          { value: 'promo', label: 'Promotion / Offre', desc: 'Mettre en avant une offre' },
+          { value: 'ouverture', label: 'Ouverture / Lancement', desc: 'Nouveau produit ou ouverture' },
+          { value: 'evenement', label: 'Événement', desc: 'Concert, vente, inauguration...' },
+        ], 2))}
+
+        ${field('Cible principale', renderRadio('cible', [
+          { value: 'local', label: 'Clientèle locale' },
+          { value: 'familles', label: 'Familles' },
+          { value: '1835', label: '18-35 ans' },
+          { value: 'pro', label: 'Professionnels / B2B' },
+          { value: 'seniors', label: 'Seniors' },
+          { value: 'gp', label: 'Grand public' },
+        ], 2))}
+      `)}
+
+      ${section('Contenu & produits', `
+        ${field('Nom du ou des produits à mettre en avant (zooms)', renderInput('produits_spot', 'Ex: Offre trio café, Sac cuir noir...', 'text', true))}
+
+        ${field('Visuels produits fournis par', renderRadio('visuels_spot', [
+          { value: 'client', label: 'Le client', desc: 'Photos / vidéos transmises avant production' },
+          { value: 'vendeur', label: 'Le vendeur', desc: 'Prise de vue terrain lors de la visite commerciale' },
+          { value: 'ia', label: 'Labo Studio génère en IA', desc: 'À partir des descriptions fournies' },
+        ]))}
+
+        ${field('Texte de voix off (brut client)', renderInput('texte_voix_promo', 'Le client fournit son texte brut. Labo Studio l\'adapte et l\'optimise pour la voix IA.', 'text', true))}
+
+        ${field('Ton souhaité', renderRadio('ton', [
+          { value: 'dynamique', label: 'Dynamique', desc: 'Énergique, punchy' },
+          { value: 'chaleureux', label: 'Chaleureux', desc: 'Proche, humain' },
+          { value: 'premium', label: 'Premium', desc: 'Élégant, haut de gamme' },
+          { value: 'humor', label: 'Humoristique', desc: 'Fun, décalé' },
+          { value: 'info', label: 'Informatif', desc: 'Clair, factuel' },
+        ], 2))}
+
+        ${field('Couleurs de la marque', renderInput('couleurs', 'Ex: rouge, or, blanc...'))}
+        ${field('Logo disponible ?', renderRadio('logo_promo', [
+          { value: 'hd', label: 'Oui — haute résolution' },
+          { value: 'basse', label: 'Oui — basse résolution' },
+          { value: 'sans', label: 'Non — pas de logo' },
+        ], 3))}
+      `)}
+
+      <div style="background:linear-gradient(135deg,rgba(201,168,76,0.08),rgba(201,168,76,0.03));border:1px solid rgba(201,168,76,0.25);border-radius:10px;padding:18px 20px;margin-bottom:24px;">
+        <div style="font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;">Ce qui est inclus — Prix fixe 499€</div>
+        <div style="display:grid;gap:6px;font-size:12px;color:var(--blanc-70);">
+          <div>✦ &nbsp;Vidéo 25 secondes — format 1920×1080 <em>ou</em> 1080×1920 (au choix)</div>
+          <div>✦ &nbsp;2 zooms produit maximum</div>
+          <div>✦ &nbsp;Voix off IA — texte adapté par Labo Studio à partir du texte client</div>
+          <div>✦ &nbsp;Musique bibliothèque incluse</div>
+          <div>✦ &nbsp;1 révision — livraison sous 10 jours ouvrés</div>
+          <div style="color:var(--blanc-40);font-size:11px;margin-top:4px;">Prix fixe non modulable. Options supplémentaires non applicables.</div>
+        </div>
+      </div>
+
+      ${section('Format de diffusion', `
+        ${field('Format vidéo souhaité', renderRadio('format_promo', [
+          { value: 'horizontal', label: '1920 × 1080', desc: 'Horizontal — YouTube, Facebook, TV' },
+          { value: 'vertical', label: '1080 × 1920', desc: 'Vertical — Reels, Stories, TikTok' },
+        ], 2))}
+        ${field('Notes complémentaires', renderInput('notes_promo', 'Contraintes, éléments à éviter, urgences...', 'text', true))}
+      `)}
+    `;
+  } else {
+    container.innerHTML = `
+      ${section('Informations client', `
+        ${field('Nom de l\'entreprise', renderInput('entreprise', 'Ex: Restaurant La Savane'))}
+        ${field('Email du client', renderInput('email_client', 'client@exemple.fr', 'email'))}
+        ${field('Téléphone', renderInput('tel_client', '+596 696 00 00 00', 'tel'))}
+      `)}
+
+      ${section('Le projet', `
+        ${field('Secteur d\'activité', renderRadio('secteur', [
+          { value: 'food', label: 'Restauration / Food' },
+          { value: 'retail', label: 'Commerce / Retail' },
+          { value: 'beaute', label: 'Beauté / Bien-être' },
+          { value: 'immo', label: 'Immobilier' },
+          { value: 'auto', label: 'Automobile' },
+          { value: 'sante', label: 'Santé / Médical' },
+          { value: 'services', label: 'Services / Artisanat' },
+          { value: 'autre', label: 'Autre' },
+        ], 2))}
+
+        ${field('Cible principale', renderRadio('cible', [
+          { value: 'local', label: 'Clientèle locale' },
+          { value: 'familles', label: 'Familles' },
+          { value: '1835', label: '18-35 ans' },
+          { value: 'pro', label: 'Professionnels / B2B' },
+          { value: 'seniors', label: 'Seniors' },
+          { value: 'gp', label: 'Grand public' },
+        ], 2))}
+
+        ${field('Objectif principal', renderRadio('objectif', [
+          { value: 'notoriete', label: 'Notoriété & visibilité' },
+          { value: 'engagement', label: 'Engagement & communauté' },
+          { value: 'ventes', label: 'Ventes & conversions' },
+          { value: 'mix', label: 'Stratégie mixte' },
+        ], 2))}
+      `)}
+
+      ${section('Contenu', `
+        ${field('Réseaux ciblés (formats adaptés en conséquence)', renderCheckbox('reseaux_promo', [
+          { value: 'instagram', label: 'Instagram', price: 0 },
+          { value: 'facebook', label: 'Facebook', price: 0 },
+          { value: 'tiktok', label: 'TikTok', price: 0 },
+          { value: 'linkedin', label: 'LinkedIn', price: 0 },
+          { value: 'youtube', label: 'YouTube / Shorts', price: 0 },
+        ], 3))}
+
+        ${field('Produits / services à mettre en avant', renderInput('produits_comm', 'Ex: menu du midi, nouvelle collection, service entretien...', 'text', true))}
+
+        ${field('Ton éditorial', renderRadio('ton', [
+          { value: 'pro', label: 'Professionnel', desc: 'Sérieux, expert' },
+          { value: 'chaleureux', label: 'Chaleureux', desc: 'Proche, humain' },
+          { value: 'fun', label: 'Fun & décalé', desc: 'Humour, légèreté' },
+          { value: 'premium', label: 'Premium', desc: 'Luxe, raffinement' },
+          { value: 'local', label: 'Local & authentique' },
+          { value: 'inspirant', label: 'Inspirant' },
+        ], 2))}
+
+        ${field('Visuels produits fournis par', renderRadio('visuels_comm', [
+          { value: 'client', label: 'Le client', desc: 'Photos / vidéos transmises avant production' },
+          { value: 'vendeur', label: 'Le vendeur', desc: 'Prise de vue terrain' },
+          { value: 'ia', label: 'Labo Studio génère en IA', desc: 'À partir des descriptions fournies' },
+        ]))}
+
+        ${field('Couleurs de la marque', renderInput('couleurs', 'Ex: rouge, or, blanc...'))}
+        ${field('Logo disponible ?', renderRadio('logo_promo', [
+          { value: 'hd', label: 'Oui — haute résolution' },
+          { value: 'basse', label: 'Oui — basse résolution' },
+          { value: 'sans', label: 'Non — pas de logo' },
+        ], 3))}
+        ${field('Notes complémentaires', renderInput('notes_promo', 'Contraintes, éléments à éviter, demandes spécifiques...', 'text', true))}
+      `)}
+
+      <div style="background:linear-gradient(135deg,rgba(201,168,76,0.08),rgba(201,168,76,0.03));border:1px solid rgba(201,168,76,0.25);border-radius:10px;padding:18px 20px;margin-bottom:24px;">
+        <div style="font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;">Ce qui est inclus — Prix fixe 499€</div>
+        <div style="display:grid;gap:6px;font-size:12px;color:var(--blanc-70);">
+          <div>✦ &nbsp;4 posts visuels — formats adaptés au(x) réseau(x) choisi(s)</div>
+          <div>✦ &nbsp;4 stories — zooms produit</div>
+          <div>✦ &nbsp;1 réel 25 secondes — ton éditorial libre</div>
+          <div>✦ &nbsp;Légendes rédigées + hashtags</div>
+          <div>✦ &nbsp;Dossier complet livré prêt à publier — le client diffuse lui-même</div>
+          <div>✦ &nbsp;1 révision — livraison sous 10 jours ouvrés</div>
+          <div style="color:var(--blanc-40);font-size:11px;margin-top:4px;">Prix fixe non modulable. Options supplémentaires non applicables.</div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+/* ================================================================
+   FORMATION PRODUIT
+   ================================================================ */
+function renderFormation() {
+  document.getElementById('q-title').textContent = 'Formation produit';
+  document.getElementById('q-subtitle').textContent = 'Module de formation interne — Labo Studio. Usage vendeur uniquement.';
+  document.getElementById('price-display').textContent = '—';
+  document.getElementById('price-plafond-info').textContent = 'Document de référence interne';
+
+  const html = `
+    <!-- INTRO -->
+    <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:24px 28px;margin-bottom:36px;">
+      <div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--blanc-40);margin-bottom:12px;">À lire avant chaque rendez-vous commercial</div>
+      <p style="font-size:14px;color:var(--blanc-70);line-height:1.8;">
+        Vendre du contenu IA, c'est vendre un <strong style="color:var(--blanc);">processus de collaboration créative</strong> — pas un rendu magique et instantané. Ce module te donne les clés pour qualifier correctement chaque client, poser les bons mots sur nos outils, et créer une relation de confiance durable.
+      </p>
+    </div>
+
+    <!-- MODULE 1 -->
+    <div class="formation-module">
+      <div class="formation-num">01</div>
+      <div class="formation-content">
+        <div class="formation-module-title">Le brief, ton meilleur outil de vente</div>
+        <div class="formation-module-intro">Un brief bien conduit, c'est moins de retours, moins de stress, et un client qui reçoit exactement ce qu'il a imaginé. C'est aussi ce qui différencie Labo Studio d'un prestataire ordinaire.</div>
+
+        <div class="formation-block formation-block--key">
+          <div class="formation-block-label">Pourquoi le brief est critique</div>
+          <div class="formation-items">
+            <div class="formation-item">
+              <div class="formation-item-icon">↘</div>
+              <div>
+                <div class="formation-item-title">Il réduit les retours</div>
+                <div class="formation-item-desc">Chaque aller-retour non prévu coûte du temps de production et dégrade la relation client. Un brief précis limite les surprises des deux côtés.</div>
+              </div>
+            </div>
+            <div class="formation-item">
+              <div class="formation-item-icon">✓</div>
+              <div>
+                <div class="formation-item-title">Il fixe les attentes dès le départ</div>
+                <div class="formation-item-desc">Le client signe mentalement un contrat de confiance. Il sait ce qu'il aura, dans quel délai, sous quelle forme. Il ne projette plus dans le vide.</div>
+              </div>
+            </div>
+            <div class="formation-item">
+              <div class="formation-item-icon">◈</div>
+              <div>
+                <div class="formation-item-title">Il protège la qualité artistique</div>
+                <div class="formation-item-desc">Sans brief, la production improvise. Avec un brief, la direction artistique a un cap clair. Le rendu est plus cohérent, plus professionnel.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="formation-block">
+          <div class="formation-block-label">Les questions à poser systématiquement</div>
+          <div class="formation-qa-grid">
+            <div class="formation-qa">
+              <div class="formation-q">Quel est l'objectif de cette communication ?</div>
+              <div class="formation-a">Notoriété, promotion, événement, recrutement — chaque objectif change le ton, le rythme, le message. Ne pas assumer.</div>
+            </div>
+            <div class="formation-qa">
+              <div class="formation-q">À qui ça s'adresse exactement ?</div>
+              <div class="formation-a">Un post pour des seniors n'a pas le même rythme qu'un Reel pour des 18-25 ans. La cible conditionne tout — choix musicaux, vitesse de montage, registre de voix.</div>
+            </div>
+            <div class="formation-qa">
+              <div class="formation-q">Quel message doit rester après visionnage ?</div>
+              <div class="formation-a">Demander au client de formuler une phrase. S'il n'y arrive pas, le brief n'est pas mûr. C'est le moment de retravailler ensemble, pas en production.</div>
+            </div>
+            <div class="formation-qa">
+              <div class="formation-q">Quelles références visuelles ou de ton ?</div>
+              <div class="formation-a">Demander des exemples concrets — publicités vues, marques admirées, ambiances souhaitées. Les mots "moderne" ou "dynamique" ne veulent rien dire sans image de référence.</div>
+            </div>
+            <div class="formation-qa">
+              <div class="formation-q">Y a-t-il des éléments à éviter absolument ?</div>
+              <div class="formation-a">Couleurs concurrentes, musiques qui font penser à autre chose, personnages qui ne correspondent pas. Mieux vaut l'apprendre en brief qu'en livraison.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="formation-tip">
+          <span class="formation-tip-icon">💡</span>
+          <span>Prends des notes visibles devant le client. Ça lui montre que tu écoutes vraiment, et ça te force à reformuler — ce qui déclenche souvent des précisions précieuses qu'il n'aurait pas données spontanément.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODULE 2 -->
+    <div class="formation-module">
+      <div class="formation-num">02</div>
+      <div class="formation-content">
+        <div class="formation-module-title">L'IA : ce qu'elle est, ce qu'elle n'est pas</div>
+        <div class="formation-module-intro">L'IA est un outil puissant — pas une baguette magique. Comprendre ses forces et ses limites, c'est ce qui te permet de vendre avec honnêteté et de construire une relation client durable.</div>
+
+        <div class="formation-block formation-block--warning">
+          <div class="formation-block-label" style="color:var(--rouge);">Ce qu'on ne promet jamais</div>
+          <div class="formation-items">
+            <div class="formation-item">
+              <div class="formation-item-icon" style="color:var(--rouge);">✕</div>
+              <div>
+                <div class="formation-item-title">Un rendu "exactement comme la référence"</div>
+                <div class="formation-item-desc">L'IA génère, elle n'imite pas à l'identique. Le client qui arrive avec un écran de référence a besoin d'entendre que nous nous en <em>inspirons</em> — nous ne la reproduisons pas.</div>
+              </div>
+            </div>
+            <div class="formation-item">
+              <div class="formation-item-icon" style="color:var(--rouge);">✕</div>
+              <div>
+                <div class="formation-item-title">Un résultat parfait au premier essai</div>
+                <div class="formation-item-desc">La production IA est un processus itératif. Les révisions prévues au contrat existent pour ça. Présente-les comme une force, pas comme un aveu de limite.</div>
+              </div>
+            </div>
+            <div class="formation-item">
+              <div class="formation-item-icon" style="color:var(--rouge);">✕</div>
+              <div>
+                <div class="formation-item-title">Tout ce que le client peut imaginer</div>
+                <div class="formation-item-desc">Certaines idées se heurtent aux limites techniques actuelles des modèles. Ne rentre jamais dans un contrat en sachant que tu ne pourras pas tenir.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="formation-block formation-block--key">
+          <div class="formation-block-label">Le discours juste face au client</div>
+          <div style="display:grid;gap:12px;">
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 18px;">
+              <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--blanc-40);margin-bottom:8px;">À dire</div>
+              <div style="font-size:13px;color:var(--blanc-70);font-style:italic;line-height:1.7;">"On va travailler pas à pas avec vous pour trouver la solution technique qui correspond le mieux à votre besoin. L'IA évolue vite, et notre rôle est d'adapter nos outils à votre projet — pas l'inverse."</div>
+            </div>
+            <div style="background:var(--surface);border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:16px 18px;">
+              <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(248,113,113,0.6);margin-bottom:8px;">À ne pas dire</div>
+              <div style="font-size:13px;color:var(--blanc-70);font-style:italic;line-height:1.7;">"L'IA peut tout faire, vous verrez c'est magique, on peut faire exactement ce que vous voulez en 24h."</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="formation-block">
+          <div class="formation-block-label">Les limites concrètes à connaître</div>
+          <div class="formation-items">
+            <div class="formation-item">
+              <div class="formation-item-icon">⚠</div>
+              <div>
+                <div class="formation-item-title">Les visages et personnages</div>
+                <div class="formation-item-desc">L'IA génère des visages cohérents mais ne peut pas reproduire fidèlement une personne réelle (un gérant, une équipe) sans prise de vue réelle. Si le client veut "son visage", il faut le préciser en brief et prévoir une prise de vue.</div>
+              </div>
+            </div>
+            <div class="formation-item">
+              <div class="formation-item-icon">⚠</div>
+              <div>
+                <div class="formation-item-title">La cohérence entre les plans</div>
+                <div class="formation-item-desc">Chaque génération est indépendante. Un personnage peut changer légèrement entre deux scènes. On compense avec la direction artistique, le montage et les transitions — mais il faut le savoir.</div>
+              </div>
+            </div>
+            <div class="formation-item">
+              <div class="formation-item-icon">⚠</div>
+              <div>
+                <div class="formation-item-title">Les textes dans les images</div>
+                <div class="formation-item-desc">L'IA génère souvent des textes illisibles ou fantaisistes dans les visuels. Les textes sont toujours ajoutés en post-production, jamais générés directement.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="formation-tip">
+          <span class="formation-tip-icon">💡</span>
+          <span>Quand un client pose une question technique à laquelle tu n'as pas la réponse, dis-le clairement : <em>"Je vais vérifier avec l'équipe de production et je te reviens."</em> C'est infiniment plus professionnel que de promettre quelque chose d'incertain.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODULE 3 -->
+    <div class="formation-module">
+      <div class="formation-num">03</div>
+      <div class="formation-content">
+        <div class="formation-module-title">La règle des visuels : moins c'est plus</div>
+        <div class="formation-module-intro">L'une des erreurs les plus fréquentes en production IA : vouloir tout mettre sur le même visuel. Un visuel surchargé ne communique rien. Il faut savoir dire non — et expliquer pourquoi c'est dans l'intérêt du client.</div>
+
+        <div class="formation-block formation-block--warning">
+          <div class="formation-block-label" style="color:var(--gold);">La règle d'or : un visuel = une information</div>
+          <div class="formation-items">
+            <div class="formation-item">
+              <div class="formation-item-icon" style="color:var(--gold);">▸</div>
+              <div>
+                <div class="formation-item-title">Visage <em>ou</em> produit — rarement les deux</div>
+                <div class="formation-item-desc">Mélanger un visage expressif et un produit en détail sur le même plan crée une compétition visuelle. L'œil ne sait pas quoi regarder en premier. L'un des deux éléments perdra toujours.</div>
+              </div>
+            </div>
+            <div class="formation-item">
+              <div class="formation-item-icon" style="color:var(--gold);">▸</div>
+              <div>
+                <div class="formation-item-title">Maximum 1 à 2 produits par plan</div>
+                <div class="formation-item-desc">Au-delà, l'IA fragmente son attention et la qualité de rendu de chaque produit diminue. Mieux vaut plusieurs plans courts et précis qu'un plan catalogue illisible.</div>
+              </div>
+            </div>
+            <div class="formation-item">
+              <div class="formation-item-icon" style="color:var(--gold);">▸</div>
+              <div>
+                <div class="formation-item-title">Le message texte ne doit pas rivaliser avec l'image</div>
+                <div class="formation-item-desc">Un fond visuel fort avec du texte par-dessus crée du bruit. Le texte s'impose sur un fond neutre ou épuré — jamais sur une scène déjà chargée.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="formation-block">
+          <div class="formation-block-label">Comment le dire au client sans le brusquer</div>
+          <div style="display:grid;gap:10px;">
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:13px;color:var(--blanc-70);line-height:1.7;">
+              <strong style="color:var(--blanc);">Situation :</strong> Le client veut son équipe de 5 personnes, ses 3 produits phares et son slogan sur le même visuel.<br>
+              <strong style="color:var(--accent);">Réponse :</strong> <em>"Pour que chaque élément soit valorisé, on va créer plusieurs plans — un pour l'équipe, un pour chaque produit. Ça donne plus de dynamisme et chaque chose est mise en valeur. Un seul plan surchargé, ça dilue le message."</em>
+            </div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:13px;color:var(--blanc-70);line-height:1.7;">
+              <strong style="color:var(--blanc);">Situation :</strong> Le client veut son logo, son adresse, ses horaires et une promotion dans un post.<br>
+              <strong style="color:var(--accent);">Réponse :</strong> <em>"On garde la promotion en accroche principale — c'est ce qui stoppe le scroll. Les infos pratiques vont dans la légende que je rédige en même temps. Le visuel fait son travail, le texte fait le sien."</em>
+            </div>
+          </div>
+        </div>
+
+        <div class="formation-tip">
+          <span class="formation-tip-icon">💡</span>
+          <span>Dis toujours <em>"pour mieux te servir"</em>, jamais <em>"ce n'est pas possible"</em>. Le client entend une décision éditoriale en sa faveur, pas une limitation technique.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODULE 4 -->
+    <div class="formation-module" style="border-bottom:none;margin-bottom:0;padding-bottom:0;">
+      <div class="formation-num">04</div>
+      <div class="formation-content">
+        <div class="formation-module-title">La direction artistique humaine : ton rôle réel</div>
+        <div class="formation-module-intro">L'IA génère. L'humain décide. C'est cette distinction qui fait la valeur de Labo Studio — et qui justifie le prix. Tu n'es pas un simple opérateur de logiciel : tu es le garant de la cohérence visuelle, du message juste, et de l'identité du client.</div>
+
+        <div class="formation-block formation-block--key">
+          <div class="formation-block-label">Ce que l'IA ne fait pas à ta place</div>
+          <div class="formation-items">
+            <div class="formation-item">
+              <div class="formation-item-icon">◉</div>
+              <div>
+                <div class="formation-item-title">Comprendre la sensibilité du client</div>
+                <div class="formation-item-desc">Un restaurateur créole n'a pas la même identité visuelle qu'un cabinet médical. Lire la marque, son histoire, ses valeurs — c'est une compétence humaine irremplaçable.</div>
+              </div>
+            </div>
+            <div class="formation-item">
+              <div class="formation-item-icon">◉</div>
+              <div>
+                <div class="formation-item-title">Juger si c'est juste</div>
+                <div class="formation-item-desc">L'IA produit ce qu'on lui demande, pas ce qui est bon. C'est ton regard qui filtre, qui sélectionne, qui dit "ça, oui" ou "ça, non". C'est ça, la direction artistique.</div>
+              </div>
+            </div>
+            <div class="formation-item">
+              <div class="formation-item-icon">◉</div>
+              <div>
+                <div class="formation-item-title">Maintenir la cohérence sur la durée</div>
+                <div class="formation-item-desc">Un client en communication mensuelle a besoin d'une ligne visuelle stable dans le temps. L'IA oublie à chaque prompt. Toi, tu te souviens, tu construis, tu fais évoluer.</div>
+              </div>
+            </div>
+            <div class="formation-item">
+              <div class="formation-item-icon">◉</div>
+              <div>
+                <div class="formation-item-title">Gérer l'imprévu avec élégance</div>
+                <div class="formation-item-desc">Un rendu qui ne correspond pas, une génération ratée, un client qui change d'avis — c'est toi qui proposes une solution alternative. L'IA, elle, recommence depuis zéro.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="formation-block">
+          <div class="formation-block-label">Comment valoriser ton rôle en rendez-vous</div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 18px;font-size:13px;color:var(--blanc-70);line-height:1.8;">
+            Ne dis pas <em>"l'IA fait la vidéo"</em>.<br>
+            Dis <em>"on produit votre spot avec des outils IA de pointe, sous direction artistique humaine. Chaque choix — le ton, l'image, la musique, le rythme — est validé par un œil créatif qui connaît votre marché."</em><br><br>
+            Ce cadrage justifie le prix, établit la confiance, et positionne Labo Studio comme un studio de création — pas comme un abonnement à un logiciel.
+          </div>
+        </div>
+
+        <div style="background:linear-gradient(135deg,rgba(232,224,208,0.06),rgba(232,224,208,0.02));border:1px solid rgba(232,224,208,0.2);border-radius:10px;padding:20px 24px;margin-top:24px;">
+          <div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent-dim);margin-bottom:12px;">À retenir</div>
+          <div style="display:grid;gap:8px;font-size:13px;color:var(--blanc-70);">
+            <div>✦ &nbsp;Brief précis → moins de retours → client satisfait → recommandation</div>
+            <div>✦ &nbsp;L'IA est un outil collaboratif, pas une promesse de perfection instantanée</div>
+            <div>✦ &nbsp;Un visuel = un message. Pas de surcharge. Jamais.</div>
+            <div>✦ &nbsp;Tu es directeur artistique. L'IA exécute. C'est ton jugement qui fait la différence.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('q-content').innerHTML = html;
+  // Cacher la barre de prix — inutile pour la formation
+  document.querySelector('.price-bar').style.display = 'none';
+}
+
+function resetForm() {
+  formState = {};
+  if (currentPrestation === 'spot') renderSpot();
+  else if (currentPrestation === 'promo') renderPromo();
+  else if (currentPrestation === 'formation') renderFormation();
+  else if (currentPrestation === 'social') renderSocial();
+  calcTotal();
+}
+
+/* ================================================================
+   GÉNÉRATION DU DEVIS
+   ================================================================ */
+function genererDevis() {
+  if (!currentPrestation) return;
+
+  const total = currentPrestation === 'spot' ? calcSpotTotal() : currentPrestation === 'promo' ? calcPromoTotal() : currentPrestation === 'formation' ? 0 : calcSocialTotal();
+  const partVendeur = Math.round(total * 0.35);
+  const acompte50 = Math.round(total * 0.50);
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+  const numDevis = 'DV-' + now.getFullYear() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0') + '-' + String(now.getHours()).padStart(2,'0') + String(now.getMinutes()).padStart(2,'0');
+
+  const entreprise = formState['entreprise'] || '—';
+  const emailClient = formState['email_client'] || '—';
+  const telClient = formState['tel_client'] || '—';
+
+  // Brief détaillé
+  let briefRows = '';
+
+  const addBriefRow = (label, key, isCheckbox = false) => {
+    if (isCheckbox) {
+      const vals = getCheckboxVals(key);
+      if (vals.length > 0) briefRows += `<div class="brief-row"><div class="brief-key">${label}</div><div class="brief-val">${vals.map(v => v.label).join(', ')}</div></div>`;
+    } else {
+      const v = formState[key];
+      if (!v) return;
+      if (Array.isArray(v) && v.length > 0) briefRows += `<div class="brief-row"><div class="brief-key">${label}</div><div class="brief-val">${v[0].label}</div></div>`;
+      else if (typeof v === 'string' && v.trim()) briefRows += `<div class="brief-row"><div class="brief-key">${label}</div><div class="brief-val">${v}</div></div>`;
+    }
+  };
+
+  if (currentPrestation === 'spot') {
+    addBriefRow('Secteur', 'secteur');
+    addBriefRow('Objectif', 'objectif');
+    addBriefRow('Cible', 'cible');
+    addBriefRow('Slogan / message clé', 'slogan');
+    addBriefRow('Délai client', 'delai_projet');
+    addBriefRow('Message principal', 'message_principal');
+    addBriefRow('Ton du spot', 'ton');
+    addBriefRow('Voix off', 'voix');
+    addBriefRow('Texte voix off', 'texte_voix');
+    addBriefRow('Musique', 'musique');
+    addBriefRow('Durée', 'duree');
+    addBriefRow('Format', 'format');
+    addBriefRow('Personnages IA', 'personnages');
+    addBriefRow('Langue', 'langue');
+    addBriefRow('Délai de production', 'delai');
+    addBriefRow('Style visuel', 'style');
+    addBriefRow('Couleurs marque', 'couleurs');
+    addBriefRow('Inspirations', 'inspirations');
+    addBriefRow('Niveau de finition', 'finition');
+    addBriefRow('Logo', 'logo_spot');
+    addBriefRow('Prise de vue', 'prise_vue_spot');
+    addBriefRow('Notes prise de vue', 'notes_prise_vue');
+  } else if (currentPrestation === 'promo') {
+    const typePromo = formState['type_promo'] && formState['type_promo'][0] ? formState['type_promo'][0].label : '—';
+    briefRows += `<div class="brief-row"><div class="brief-key">Type d'offre</div><div class="brief-val">${typePromo}</div></div>`;
+    addBriefRow('Secteur', 'secteur');
+    addBriefRow('Objectif', 'objectif');
+    addBriefRow('Cible', 'cible');
+    addBriefRow('Ton', 'ton');
+    addBriefRow('Couleurs', 'couleurs');
+    addBriefRow('Logo', 'logo_promo');
+    addBriefRow('Produits / zooms', 'produits_spot');
+    addBriefRow('Produits comm', 'produits_comm');
+    addBriefRow('Visuels fournis par', 'visuels_spot');
+    addBriefRow('Visuels fournis par', 'visuels_comm');
+    addBriefRow('Texte voix off brut', 'texte_voix_promo');
+    addBriefRow('Format vidéo', 'format_promo');
+    addBriefRow('Réseaux ciblés', 'reseaux_promo', true);
+    addBriefRow('Notes', 'notes_promo');
+  } else {
+    addBriefRow('Secteur', 'secteur');
+    if (formState['secteur_autre']) addBriefRow('Secteur (précision)', 'secteur_autre');
+    addBriefRow('Situation réseaux actuels', 'situation_rs');
+    addBriefRow('Cible', 'cible');
+    addBriefRow('Objectif', 'objectif');
+    addBriefRow('Types de contenus', 'types_contenu', true);
+    addBriefRow('Ton éditorial', 'ton');
+    addBriefRow('Volume de contenus / mois', 'freq_pub');
+    addBriefRow('Vidéos courtes / mois', 'stories');
+    addBriefRow('Formats adaptés pour', 'reseaux', true);
+    addBriefRow('Prise de vue', 'prise_vue_social');
+    addBriefRow('Notes / précisions', 'notes_social');
+    addBriefRow('Éléments fournis', 'elements_fournis', true);
+    addBriefRow('Formule', 'formule');
+    addBriefRow('Logo', 'logo_social');
+  }
+
+  // Tableau des options choisies avec prix
+  let optRows = '';
+  const BASE = currentPrestation === 'spot' ? BASE_SPOT : BASE_SOCIAL;
+  optRows += `<tr><td>Base — ${currentPrestation === 'spot' ? 'Spot 15 sec, voix IA, 1 format, livraison standard' : '4 posts/mois, Instagram, sans story, mois par mois'}</td><td style="color:var(--blanc-40)">Inclus</td><td>${BASE}€</td></tr>`;
+
+  const addOptRow = (key, label, isCheckbox = false) => {
+    if (isCheckbox) {
+      const vals = getCheckboxVals(key);
+      vals.forEach(v => {
+        if (v.price > 0) optRows += `<tr><td>${label} — ${v.label}</td><td style="color:var(--blanc-40)">Option</td><td>+${v.price}€</td></tr>`;
+      });
+    } else {
+      const v = formState[key];
+      if (!v || !Array.isArray(v) || v.length === 0) return;
+      const item = v[0];
+      if (item.price > 0) optRows += `<tr><td>${label} — ${item.label}</td><td style="color:var(--blanc-40)">Option</td><td>+${item.price}€</td></tr>`;
+    }
+  };
+
+  if (currentPrestation === 'spot') {
+    addOptRow('voix', 'Voix off');
+    addOptRow('musique', 'Musique');
+    addOptRow('duree', 'Durée');
+    addOptRow('personnages', 'Personnages IA');
+    addOptRow('langue', 'Langue');
+    addOptRow('delai', 'Délai de production');
+    addOptRow('style', 'Style visuel');
+    addOptRow('finition', 'Finition');
+    addOptRow('logo_spot', 'Logo');
+    addOptRow('prise_vue_spot', 'Prise de vue');
+    const fmt = formState['format'];
+    if (fmt && fmt[0] && fmt[0].value === 'tous') {
+      optRows += `<tr><td>Tous formats — Adaptations incluses</td><td style="color:var(--blanc-40)">Multiplicateur</td><td>× 2</td></tr>`;
+    }
+  } else if (currentPrestation === 'promo') {
+    const tp = formState['type_promo'] && formState['type_promo'][0] ? formState['type_promo'][0].label : 'Offre promo';
+    optRows += `<tr><td>${tp} — forfait tout inclus</td><td style="color:var(--gold)">Prix fixe</td><td style="color:var(--gold)">499€</td></tr>`;
+  } else {
+    addOptRow('freq_pub', 'Volume de contenus');
+    addOptRow('stories', 'Vidéos courtes');
+    addOptRow('prise_vue_social', 'Prise de vue produits');
+    addOptRow('elements_fournis', 'Éléments non fournis', true);
+    addOptRow('situation_rs', 'Identité graphique + stratégie');
+
+    const formule = getVal('formule');
+    if (formule && formule.value === 'trimestriel') {
+      optRows += `<tr><td>Remise formule trimestrielle</td><td style="color:var(--vert)">Remise</td><td style="color:var(--vert)">−10%</td></tr>`;
+    }
+    if (formule && formule.value === 'annuel') {
+      optRows += `<tr><td>Remise formule annuelle</td><td style="color:var(--vert)">Remise</td><td style="color:var(--vert)">−20%</td></tr>`;
+    }
+
+    const identiteIncluseDevis = formState['situation_rs'] && formState['situation_rs'][0] && formState['situation_rs'][0].value === 'zero';
+    if (!identiteIncluseDevis) {
+      const logoSocial = formState['logo_social'];
+      if (logoSocial && logoSocial[0]) {
+        if (logoSocial[0].value === 'basse') optRows += `<tr><td>Logo basse résolution — retravail (1er mois)</td><td style="color:var(--blanc-40)">1er mois</td><td>+50€</td></tr>`;
+        if (logoSocial[0].value === 'sans') optRows += `<tr><td>Création logotype (1er mois)</td><td style="color:var(--blanc-40)">1er mois</td><td>+80€</td></tr>`;
+      }
+    } else {
+      optRows += `<tr><td>Identité graphique complète — logo inclus (1er mois)</td><td style="color:var(--vert)">Inclus</td><td>✓</td></tr>`;
+    }
+  }
+
+  const periodicity = (currentPrestation === 'social') ? '/mois' : '';
+
+  const html = `
+    <div class="devis-header">
+      <div class="devis-logo-block">
+        <div class="devis-logo-name">Labo Studio</div>
+        <div class="devis-logo-tagline">Studio de communication IA</div>
+      </div>
+      <div class="devis-meta">
+        <div class="devis-num">N° ${numDevis}</div>
+        <div class="devis-date">${dateStr}</div>
+        <div class="devis-vendor">Vendeur : ${currentVendor.prenom}</div>
+      </div>
+    </div>
+
+    <div class="devis-section">
+      <div class="devis-section-title">Informations client</div>
+      <div class="devis-brief-grid">
+        <div class="brief-row"><div class="brief-key">Entreprise</div><div class="brief-val">${entreprise}</div></div>
+        <div class="brief-row"><div class="brief-key">Email</div><div class="brief-val">${emailClient}</div></div>
+        <div class="brief-row"><div class="brief-key">Téléphone</div><div class="brief-val">${telClient}</div></div>
+        <div class="brief-row"><div class="brief-key">Prestation</div><div class="brief-val">${currentPrestation === 'spot' ? 'Spot publicitaire IA' : currentPrestation === 'promo' ? 'Offre promotionnelle — 499€' : currentPrestation === 'formation' ? 'Formation produit interne' : 'Pack communication mensuelle'}</div></div>
+      </div>
+    </div>
+
+    <div class="devis-section">
+      <div class="devis-section-title">Brief complet</div>
+      <div class="devis-brief-grid">${briefRows || '<div class="brief-row"><div class="brief-key text-dim">Aucune information renseignée</div></div>'}</div>
+    </div>
+
+    <div class="devis-section">
+      <div class="devis-section-title">Détail tarifaire</div>
+      <table class="devis-table">
+        <thead><tr>
+          <th>Prestation / Option</th>
+          <th>Type</th>
+          <th style="text-align:right">Montant</th>
+        </tr></thead>
+        <tbody>${optRows}</tbody>
+      </table>
+
+      <div class="devis-total-block">
+        <div class="total-item">
+          <div class="total-item-label">Total devis</div>
+          <div class="total-item-val">${total}€${periodicity}</div>
+        </div>
+        <div class="total-item">
+          <div class="total-item-label">Part vendeur (35%)</div>
+          <div class="total-item-val gold">${partVendeur}€${periodicity}</div>
+        </div>
+        <div class="total-item">
+          <div class="total-item-label">Acompte 50% à la commande</div>
+          <div class="total-item-val vert">${acompte50}€</div>
+        </div>
+        <div class="total-item">
+          <div class="total-item-label">Solde à la livraison</div>
+          <div class="total-item-val">${total - acompte50}€</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="devis-conditions">
+      <strong>Conditions de démarrage :</strong> La production commence à partir du versement de l'acompte de 50% (${acompte50}€) ou de la totalité du montant (${total}€${periodicity}). Ce devis est valable 30 jours à compter de sa date d'émission.<br><br>
+      <strong>Remarque :</strong> Ce document est un récapitulatif interne établi par <strong>${currentVendor.prenom}</strong>. Il n'est pas conservé sur le serveur Labo Studio. Merci de le télécharger ou de l'imprimer pour archivage.
+    </div>
+  `;
+
+  document.getElementById('devis-preview').innerHTML = html;
+  document.getElementById('modal-devis').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal-devis').classList.remove('open');
+}
+
+// Fermer modal en cliquant hors
+document.getElementById('modal-devis').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
+</body>
+</html>
